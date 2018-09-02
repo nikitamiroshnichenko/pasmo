@@ -71,6 +71,12 @@ logic_error MACROLostENDM ("Unexpected MACRO without ENDM");
 // Errors in the code being assembled.
 
 runtime_error ErrorReadingINCBIN ("Error reading INCBIN file");
+runtime_error ErrorRangeSAVEBIN("Error SAVEBIN out of range");
+runtime_error ErrorSAVEBINwrite("Error SAVEBIN faled to write file");
+runtime_error ErrorHEXlength("Error HEX data not correct length");
+runtime_error ErrorHEXIllegal("Error HEX Data illegal characters");
+runtime_error ErrorALIGN("Error ALIGN failed");
+runtime_error ErrorMessage("Error in Message format");
 runtime_error ErrorOutput ("Error writing object file");
 runtime_error ErrorSNAOutput("Error writing object file; No start address defined. Use END to set address.");
 
@@ -1132,10 +1138,20 @@ private:
     void parseNextReg (Tokenizer & tz);
     void parseTest (Tokenizer & tz);
 
-	void parseDEFB (Tokenizer & tz);
+
+	void parseRB(Tokenizer & tz, const std::string & label);
+	void parseRW(Tokenizer & tz, const std::string & label);
+	void parseDEFB(Tokenizer & tz);
 	void parseDEFW (Tokenizer & tz);
 	void parseDEFS (Tokenizer & tz);
 	void parseINCBIN (Tokenizer & tz);
+	void parseSAVEBIN(Tokenizer & tz);
+	void parseALIGN(Tokenizer & tz);
+
+	void parseMESSAGE(Tokenizer & tz);
+	void parseRSSET(Tokenizer & tz);
+	void parseHEX(Tokenizer & tz);
+
 	void parsePUBLIC (Tokenizer & tz);
 	void parseEND (Tokenizer & tz);
 	void parseLOCAL (Tokenizer & tz);
@@ -1158,6 +1174,9 @@ private:
 	DebugType debugtype;
 
 	byte mem[65536]{};
+
+	int rsset = 0;
+
 	address base;
 	address current;
 	address currentinstruction;
@@ -1728,6 +1747,7 @@ void Asm::In::parsevalue (Tokenizer & tz, address & result,
 		result= getvalue (tok.str (), required, ignored);
 		break;
 	case TypeDollar:
+	case TypePC:
 		result= currentinstruction;
 		break;
 	case TypeLiteral:
@@ -2333,6 +2353,10 @@ void Asm::In::parseline (Tokenizer & tz)
 	case TypeSTACK:
 		parseSTACK(tz);
 		break;
+	case TypeRB:
+		throw EQUwithoutlabel;
+	case TypeRW:
+		throw EQUwithoutlabel;
 	case TypeEQU:
 		throw EQUwithoutlabel;
 	case TypeDEFL:
@@ -2384,7 +2408,7 @@ bool Asm::In::isautolocalname (const std::string & name)
 
 	if (! autolocalmode)
 		return false;
-	return name [0] == AutoLocalPrefix;
+	return name [0] == AutoLocalPrefix || name[0] == '@';
 }
 
 AutoLevel * Asm::In::enterautolocal ()
@@ -2614,6 +2638,8 @@ void Asm::In::parsegeneric (Tokenizer & tz, Token tok)
 	case TypeDEFM:
 		parseDEFB (tz);
 		break;
+
+
 	case TypeDEFW:
 	case TypeDW:
 		parseDEFW (tz);
@@ -2624,6 +2650,21 @@ void Asm::In::parsegeneric (Tokenizer & tz, Token tok)
 		break;
 	case TypeINCBIN:
 		parseINCBIN (tz);
+		break;
+	case TypeSAVEBIN:
+		parseSAVEBIN(tz);
+		break;
+	case TypeMESSAGE:
+		parseMESSAGE(tz);
+		break;
+	case TypeALIGN:
+		parseALIGN(tz);
+		break;
+	case TypeRSSET:
+		parseRSSET(tz);
+		break;
+	case TypeHEX:
+		parseHEX(tz);
 		break;
 	case TypeEND:
 		parseEND (tz);
@@ -2759,6 +2800,10 @@ void Asm::In::parsegeneric (Tokenizer & tz, Token tok)
 		break;
 	case TypeEQU:
 		throw EQUwithoutlabel;
+	case TypeRW:
+		throw EQUwithoutlabel;
+	case TypeRB:
+		throw EQUwithoutlabel;
 	case TypeDEFL:
 		throw DEFLwithoutlabel;
 	case Type_SHIFT:
@@ -2816,6 +2861,39 @@ void Asm::In::parseSTACK(Tokenizer & tz, const std::string & label)
 	if (!label.empty())
 		setlabel(label);
 }
+
+void Asm::In::parseRB(Tokenizer & tz, const std::string & label)
+{
+
+	Token tok = tz.gettoken();
+
+	int num = tok.num();
+	int value = rsset;
+	bool islocal = setequorlabel(label, value);
+
+	rsset += num;
+	checkendline(tz);
+	*pout << tablabel(label) << "RB ";
+	*pout << hex4(value) << endl;
+
+}
+
+void Asm::In::parseRW(Tokenizer & tz, const std::string & label)
+{
+
+	Token tok = tz.gettoken();
+
+	int num = tok.num();
+	int value = rsset;
+	bool islocal = setequorlabel(label, value);
+
+	rsset += num*2;
+	checkendline(tz);
+	*pout << tablabel(label) << "RW ";
+	*pout << hex4(value) << endl;
+
+}
+
 
 void Asm::In::parseEQU (Tokenizer & tz, const std::string & label)
 {
@@ -3104,6 +3182,13 @@ void Asm::In::parselabel (Tokenizer & tz, const std::string & name)
 		break;
 	case TypeEQU:
 		parseEQU (tz, name);
+		break;
+	case TypeRB:
+		parseRB(tz, name);
+		break;
+
+	case TypeRW:
+		parseRW(tz, name);
 		break;
 	case TypeDEFL:
 		parseDEFL (tz, name);
@@ -5505,11 +5590,14 @@ void Asm::In::parseNextReg (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
 
+
 	if (tok.type () == TypeNumber)
 	{
     	byte reg= parseexpr (true, tok, tz);
     	expectcomma (tz);
 	    Token tok= tz.gettoken ();
+
+
     	TypeToken tt= tok.type ();
         if (tok.type () == TypeA)
         {
@@ -5524,7 +5612,7 @@ void Asm::In::parseNextReg (Tokenizer & tz)
     		checkendline (tz);
             return;
         }
-        else if (tok.type () == TypeNumber)
+        else if (tok.type () == TypeNumber || tok.type() == TypeIdentifier)
         {
         	no86 ();
 
@@ -5539,7 +5627,7 @@ void Asm::In::parseNextReg (Tokenizer & tz)
     		checkendline (tz);
             return;
         }
-        else
+		else
         {
             // invalid operation
 			throw InvalidInstruction;
@@ -5564,6 +5652,8 @@ void Asm::In::parseTest (Tokenizer & tz)
     no8080 ();
     checkendline (tz);
  }
+
+
 
 
 void Asm::In::parseDEFB (Tokenizer & tz)
@@ -5606,6 +5696,10 @@ void Asm::In::parseDEFB (Tokenizer & tz)
 	oss << "DEFB of " << count << " bytes";
 	showcode (oss.str () );
 }
+
+
+
+
 
 void Asm::In::parseDEFW (Tokenizer & tz)
 {
@@ -5672,6 +5766,198 @@ void Asm::In::parseINCBIN (Tokenizer & tz)
 		}
 	}
 }
+
+
+void Asm::In::parseSAVEBIN(Tokenizer & tz)
+{
+	// we onyl want to write on the last pass
+	if (currentpass() == lastpass)
+	{
+		std::string savefile = tz.getincludefile();
+
+
+		int addr = 0;
+		int size = 0;
+		expectcomma(tz);
+		Token tok = tz.gettoken();
+		if (tok.type() == TypeNumber || tok.type() == TypeIdentifier)
+		{
+			addr = parseexpr(true, tok, tz);
+			expectcomma(tz);
+
+			Token tok = tz.gettoken();
+			if (tok.type() == TypeNumber || tok.type() == TypeIdentifier)
+			{
+				size = parseexpr(true, tok, tz);
+			}
+
+			*pout << "\t\tSAVEBIN " << savefile << " " << addr << " " << size << endl;
+
+			if (addr < 0 || addr >65535 || (addr + size) > 65536)
+			{
+				throw ErrorRangeSAVEBIN;
+
+			}
+
+
+			std::ofstream out(savefile,
+				std::ios::out | std::ios::binary);
+			if (!out.is_open())
+				throw ErrorSAVEBINwrite;
+
+			out.write(reinterpret_cast<char *>(mem + addr), size);
+
+			out.close();
+
+
+		}
+
+	}
+
+
+}
+
+
+void Asm::In::parseALIGN(Tokenizer & tz)
+{
+	Token tok = tz.gettoken();
+
+	if (tok.type() != TypeNumber)
+	{
+		throw ErrorALIGN;
+	}
+
+
+	address pc = currentinstruction;
+	
+	//how much to pad
+	int mod = tok.num() - (pc % tok.num());
+
+	for (int i = 0; i < mod; i++)
+	{
+		gencode(0);
+	}
+
+
+
+}
+
+
+
+
+void Asm::In::parseRSSET(Tokenizer & tz)
+{
+	rsset = 0;
+
+	Token tok = tz.gettoken();
+	if (tok.type() == TypeNumber)
+	{
+		rsset = tok.num();
+	}
+
+	*pout << "\t\RSSET=" << rsset << endl;
+
+
+
+
+}
+
+void Asm::In::parseMESSAGE(Tokenizer & tz)
+{
+	// we onyl want to write on the last pass
+	if (currentpass() == lastpass)
+	{
+		// std::string savefile = tz.getincludefile();
+
+		address result;
+		Token tok = tz.gettoken();
+		while (tok.type() != TypeEndLine)
+		{
+			switch (tok.type())
+			{
+				case TypeIdentifier:
+					result = getvalue(tok.str(), true, false);
+					*pwarn << hex4str(result);
+					break;
+
+
+				case TypeDollar:
+				case TypePC:
+					*pwarn << hex4str(currentinstruction);
+					break;
+				default:
+					*pwarn << tok.str();
+					break;
+
+
+			}
+
+			tok = tz.gettoken();
+			if (tok.type() == TypeEndLine) break;
+
+
+			if (tok.type() != TypeComma)
+			{
+				throw ErrorMessage;
+			}
+
+			tok = tz.gettoken();
+
+
+		}
+
+
+		*pwarn << endl;
+
+
+	}
+
+
+}
+
+
+void Asm::In::parseHEX(Tokenizer & tz)
+{
+		Token tok = tz.gettoken();
+
+		if (tok.type() == TypeIdentifier )
+		{
+			std::string s = tok.str();
+
+			*pout << "\t\tHEX " << s<<" " << endl;
+
+
+			int length = s.length();
+			if (length <= 0 || (length & 1) != 0)
+			{
+				throw ErrorSAVEBINwrite;
+			}
+
+			//stringstream converter;
+			for (int i = 0; i < length; i += 2)
+			{
+				unsigned char data;
+
+				try
+				{
+					sscanf(s.c_str() + i, "%2hhx", &data);
+				}
+				catch (...)
+				{
+					throw ErrorHEXIllegal;
+				}
+
+				gencode((byte)data);
+
+			}
+
+
+
+		}
+
+
+}
+
 
 
 //*********************************************************

@@ -214,6 +214,8 @@ const NameType nt []= {
 	// Directives
 	NT (DEFB),
 	NT (DB),
+	NT (RB),
+	NT (RW),
 	NT (DEFM),
 	NT (DEFW),
 	NT (DW),
@@ -225,6 +227,12 @@ const NameType nt []= {
 	NT (STACK),
 	NT (INCLUDE),
 	NT (INCBIN),
+	NT (SAVEBIN),
+	NT (MESSAGE),
+	NT (PC),
+	NT (ALIGN),
+	NT (RSSET),
+	NT (HEX),
 	NT (IF),
 	NT (ELSE),
 	NT (ENDIF),
@@ -906,7 +914,7 @@ Token parseidentifier (std::istream & iss, char c, bool nocase)
 	}
 }
 
-Token parsetoken (std::istream & iss, bool nocase)
+Token parsetoken (Token lasttok,std::istream & iss, bool nocase)
 {
 	char c;
 
@@ -985,8 +993,15 @@ Token parsetoken (std::istream & iss, bool nocase)
 		; // Nothing
 	}
 
-	if (isdigit (c) )
-		return parsedigit (iss, c);
+	//need to check last token to work with hex 
+	if (lasttok.type() == TypeHEX)
+	{
+		return parseidentifier(iss, c, nocase);
+	}
+
+	if (isdigit(c))
+		return parsedigit(iss, c);
+
 
 	if (ischarbeginidentifier (c) )
 		return parseidentifier (iss, c, nocase);
@@ -1105,8 +1120,10 @@ Tokenizer::Tokenizer (const std::string & line, bool nocase_n) :
 		iss.unget ();
 
 	Token tok;
-	while ( (tok= parsetoken (iss, nocase) ).type () != TypeEndLine)
+	Token lasttok;
+	while ( (tok= parsetoken (lasttok,iss, nocase) ).type () != TypeEndLine)
 	{
+		lasttok = tok;
 		tokenlist.push_back (tok);
 		switch (tok.type () )
 		{
