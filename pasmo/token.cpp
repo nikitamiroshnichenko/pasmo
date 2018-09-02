@@ -909,8 +909,11 @@ Token parseidentifier (std::istream & iss, char c, bool nocase)
 Token parsetoken (std::istream & iss, bool nocase)
 {
 	char c;
+
 	if (! (iss >> c) )
 		return Token (TypeEndLine);
+
+
 	switch (c)
 	{
 	case ';':
@@ -926,7 +929,15 @@ Token parsetoken (std::istream & iss, bool nocase)
 	case '*':
 		return Token (TypeMult);
 	case '/':
-		return Token (TypeDiv);
+	{
+		if (iss.peek() == '/')		//peek to see if we have a // comment
+		{
+			return Token(TypeEndLine);
+
+		}
+		else
+			return Token(TypeDiv);
+	}
 	case '=':
 		return Token (TypeEqOp);
 	case '<':
