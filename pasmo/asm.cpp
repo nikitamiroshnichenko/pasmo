@@ -5967,6 +5967,9 @@ void Asm::In::parseALIGN(Tokenizer & tz)
 	//how much to pad
 	int mod = tok.num() - (pc % tok.num());
 
+	// check for already aligned!
+	if (mod == tok.num()) return;
+
 	for (int i = 0; i < mod; i++)
 	{
 		gencode(0);
