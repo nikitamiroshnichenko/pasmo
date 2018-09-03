@@ -9,10 +9,10 @@ Extra Options:
 
 
 Comments:
-You can now use // & ; to define line comments
+You can now use // and ; to define line comments
 
 labels:
-You can now use @ int he same way as _ is pasmo.	
+You can now use @ in the same way as _ is pasmo.	
 
 
 
@@ -20,7 +20,7 @@ Commands:
 
 
 SAVEBIN <filename>,<addr>,<length>
-	On last pass file will be written to the hdd fromt he assembled memory, if pc is before the last address datat is undefined.
+	On last pass file will be written to the hdd fromt he assembled memory, if pc is before the last address data is undefined.
 example
 	SAVEBIN "build/bank4.bin",$c000,PC-$c000
 
