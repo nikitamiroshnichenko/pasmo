@@ -17,7 +17,7 @@ public:
 	~AsmFile ();
 	void addincludedir (const std::string & dirname);
 	void loadfile (const std::string & filename, bool nocase,
-		std::ostream & outverb, std::ostream& outerr);
+		std::ostream & outverb, std::ostream& outerr, bool usesnasmerrors = false);
 	size_t getline () const;
 protected:
 	void openis (std::ifstream & is, const std::string & filename,

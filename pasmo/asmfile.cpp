@@ -209,7 +209,7 @@ public:
 		std::ios::openmode mode) const;
 	void copyfile (FileRef & fr, std::ostream & outverb);
 	void loadfile (const std::string & filename, bool nocase,
-		std::ostream & outverb, std::ostream& outerr);
+		std::ostream & outverb, std::ostream& outerr, bool usesnasmerrors = false);
 	void showlineinfo (std::ostream & os, size_t nline,bool usesnasmerrors = false) const;
 private:
 	In (const In &); // Forbidden.
@@ -372,7 +372,7 @@ void AsmFile::In::copyfile (FileRef & fr, std::ostream & outverb)
 }
 
 void AsmFile::In::loadfile (const std::string & filename, bool nocase,
-	std::ostream & outverb, std::ostream& outerr)
+	std::ostream & outverb, std::ostream& outerr,bool usesnasmerrors)
 {
 	using std::endl;
 
@@ -430,17 +430,17 @@ void AsmFile::In::loadfile (const std::string & filename, bool nocase,
 	}
 	catch (...)
 	{
-		//if (snasmerrors)
-		//{
-		//		outerr << "ERROR on line " << linenum + 1 <<
-		//			" of file " << filename << endl;
-		//
-		//
-		//}
-		//else
+		if (!usesnasmerrors)
+		{
+				outerr << "ERROR on line " << linenum + 1 <<
+					" of file " << filename << endl;
+		
+		
+		}
+		else
 		{
 			outerr << filename << "(" << linenum + 1 <<
-				") error: " << endl;
+				"): error: " << endl;
 
 		}
 
@@ -461,7 +461,7 @@ void AsmFile::In::showlineinfo (std::ostream & os, size_t nline,bool usesnasmerr
 	if (usesnasmerrors)
 	{
 		os << fileref.name()<< "(" << fileref.numline(linf.getfileline()) + 1 <<
-			") ";
+			"): ";
 
 	}
 	else
@@ -517,9 +517,9 @@ void AsmFile::openis (std::ifstream & is, const std::string & filename,
 }
 
 void AsmFile::loadfile (const std::string & filename, bool nocase,
-	std::ostream & outverb, std::ostream& outerr)
+	std::ostream & outverb, std::ostream& outerr,bool usesnasmerrors)
 {
-	in ().loadfile (filename, nocase, outverb, outerr);
+	in ().loadfile (filename, nocase, outverb, outerr, usesnasmerrors);
 }
 
 bool AsmFile::getvalidline ()

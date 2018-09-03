@@ -96,6 +96,7 @@ public:
 	bool redirerr () const { return redirecterr; }
 	bool publiconly () const { return emitpublic; }
 	bool getpass3 () const { return pass3; }
+	bool getsnasmerrors() const { return snasmerrors; }
 	bool getcspecsymbols() const { return cspecsymbols; }
 	string getfilein () const { return filein; }
 	string getfileout () const { return fileout; }
@@ -333,7 +334,7 @@ int doit (int argc, char * * argv)
 
 	option.apply (assembler);
 
-	assembler.loadfile (option.getfilein () );
+	assembler.loadfile (option.getfilein () ,option.getsnasmerrors());
 	assembler.processfile ();
 
 	// Generate ouptut file.

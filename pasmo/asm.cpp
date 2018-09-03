@@ -921,7 +921,7 @@ public:
 	void addpredef (const std::string & predef);
 	void setheadername (const std::string & headername_n);
 
-	void loadfile (const std::string & filename);
+	void loadfile (const std::string & filename,bool usesnasmerrors);
 	void processfile ();
 
 	int currentpass () const;
@@ -2635,9 +2635,9 @@ void Asm::In::dopass ()
 	* pverb << "Pass " << pass << " finished" << endl;
 }
 
-void Asm::In::loadfile (const std::string & filename)
+void Asm::In::loadfile (const std::string & filename,bool usesnasmerrors)
 {
-	AsmFile::loadfile (filename, nocase, * pverb, * perr);
+	AsmFile::loadfile (filename, nocase, * pverb, * perr, usesnasmerrors);
 }
 
 void Asm::In::processfile ()
@@ -7457,9 +7457,9 @@ void Asm::addpredef (const std::string & predef)
 	pin->addpredef (predef);
 }
 
-void Asm::loadfile (const std::string & filename)
+void Asm::loadfile (const std::string & filename, bool usesnasmerrors)
 {
-	pin->loadfile (filename);
+	pin->loadfile (filename, usesnasmerrors);
 }
 
 void Asm::processfile ()

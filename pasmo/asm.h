@@ -36,7 +36,7 @@ public:
 	void addpredef (const std::string & predef);
 	void setheadername (const std::string & headername_n);
 
-	void loadfile (const std::string & filename);
+	void loadfile (const std::string & filename,bool usesnasmerrors = false);
 	void processfile ();
 
 	void emitobject (std::ostream & out);
