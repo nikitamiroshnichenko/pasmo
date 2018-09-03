@@ -942,6 +942,7 @@ public:
 	void emitmsx (std::ostream & out);
 	void dumppublic (std::ostream & out);
 	void dumpsymbol (std::ostream & out);
+	void dumpsymbolcspec(std::ostream & out);
 private:
 	void operator = (const Asm::In &); // Forbidden.
 
@@ -5616,9 +5617,9 @@ void Asm::In::parseNextReg (Tokenizer & tz)
         {
         	no86 ();
 
-        	gencodeED (0x93);
+        	gencodeED (0x91);
             gendata (reg);
-        	byte value= parseexpr (true, tok, tz);
+        	byte value= parseexpr (false, tok, tz);
             gendata (value);
         	showcode ("NEXTREG " + hex2str (reg) + ", " + hex2str (value));
 
@@ -7168,12 +7169,28 @@ void Asm::In::dumpsymbol (std::ostream & out)
 		if (vd.def () != DefinedPass2)
 			continue;
 
+
 		out << tablabel (it->first) << "EQU 0" <<
 			hex4 (vd.getvalue () ) << 'H'
 			<< endl;
 	}
 }
 
+void Asm::In::dumpsymbolcspec(std::ostream & out)
+{
+	for (mapvar_t::iterator it = mapvar.begin();
+		it != mapvar.end();
+		++it)
+	{
+		const VarData & vd = it->second;
+		// Dump only EQU and label valid symbols.
+		if (vd.def() != DefinedPass2)
+			continue;
+
+		out << "0000" << hex4(vd.getvalue()) << " " << it->first << endl;
+
+	}
+}
 
 //*********************************************************
 //			class Asm
@@ -7345,6 +7362,10 @@ void Asm::dumppublic (std::ostream & out)
 void Asm::dumpsymbol (std::ostream & out)
 {
 	pin->dumpsymbol (out);
+}
+void Asm::dumpsymbolcspec(std::ostream & out)
+{
+	pin->dumpsymbolcspec(out);
 }
 
 // End of asm.cpp

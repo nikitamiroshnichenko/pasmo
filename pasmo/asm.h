@@ -60,6 +60,7 @@ public:
 	void emitmsx (std::ostream & out);
 	void dumppublic (std::ostream & out);
 	void dumpsymbol (std::ostream & out);
+	void dumpsymbolcspec(std::ostream & out);
 private:
 	Asm (const Asm & a); // Forbidden
 	void operator = (const Asm &); // Forbidden

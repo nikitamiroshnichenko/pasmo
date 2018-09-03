@@ -73,6 +73,7 @@ const string optpass3     ("--pass3");
 const string optplus3dos  ("--plus3dos");
 const string optprl       ("--prl");
 const string optpublic    ("--public");
+const string optcspecsymbols ("--cspecsymbols");
 const string opttap       ("--tap");
 const string opttapbas    ("--tapbas");
 const string opttzx       ("--tzx");
@@ -91,6 +92,7 @@ public:
 	bool redirerr () const { return redirecterr; }
 	bool publiconly () const { return emitpublic; }
 	bool getpass3 () const { return pass3; }
+	bool getcspecsymbols() const { return cspecsymbols; }
 	string getfilein () const { return filein; }
 	string getfileout () const { return fileout; }
 	string getfilesymbol () const { return filesymbol; }
@@ -103,6 +105,7 @@ private:
 
 	bool verbose;
 	bool emitpublic;
+	bool cspecsymbols = false;
 	Asm::DebugType debugtype;
 	bool redirecterr;
 	bool nocase;
@@ -175,6 +178,8 @@ Options::Options (int argc, char * * argv) :
 			emitfunc= & Asm::emitsna;
 		else if (arg == optpublic)
 			emitpublic= true;
+		else if (arg == optcspecsymbols)
+			cspecsymbols = true;
 		else if (arg == optname)
 		{
 			++argpos;
@@ -342,7 +347,11 @@ int doit (int argc, char * * argv)
 			cout_buf= cout.rdbuf ();
 			cout.rdbuf (sout.rdbuf () );
 		}
-		assembler.dumpsymbol (cout);
+
+		if (option.getcspecsymbols())
+			assembler.dumpsymbolcspec(cout);
+		else
+			assembler.dumpsymbol (cout);
 		if (cout_buf)
 		{
 			cout.rdbuf (cout_buf);
