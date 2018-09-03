@@ -5780,6 +5780,25 @@ void Asm::In::parseNextReg (Tokenizer & tz)
     		checkendline (tz);
             return;
         }
+		else if (tok.type() == TypeGETBANK)
+		{
+
+
+			no86();
+
+			gencodeED(0x91);
+			gendata(reg);
+			address result;
+			parsebankvalue(tz, result, false, false);
+
+			//byte value = parseexpr(false, tok, tz);
+			gendata(result);
+			showcode("NEXTREG " + hex2str(reg) + ", " + hex4str(result));
+
+			no8080();
+
+			checkendline(tz);
+		}
 		else
         {
             // invalid operation
@@ -6477,7 +6496,7 @@ void Asm::In::expandMACRO (const std::string & name,
 	{
 		if (!usesnasmerrors)
 		{
-			*perr << "ERROR expanding macro";
+			*perr << "ERROR: expanding macro";
 			showlineinfo(*perr, mframe.getexpline(),usesnasmerrors);
 			*perr << endl;
 
@@ -6485,7 +6504,7 @@ void Asm::In::expandMACRO (const std::string & name,
 		else
 		{
 			showlineinfo(*perr, mframe.getexpline(), usesnasmerrors);
-			*perr << "ERROR expanding macro";
+			*perr << "ERROR: expanding macro";
 			*perr << endl;
 
 		}
