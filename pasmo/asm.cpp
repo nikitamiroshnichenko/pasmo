@@ -916,6 +916,7 @@ public:
 	void warn8080 ();
 	void set86 ();
 	void setpass3 ();
+	void snasmerrors();
 
 	void addpredef (const std::string & predef);
 	void setheadername (const std::string & headername_n);
@@ -1223,6 +1224,7 @@ private:
 	bool hasentrypoint;
 	int pass;
 	int lastpass;
+	bool usesnasmerrors;
 	size_t iflevel;
 
 	// ********** Symbol tables ************
@@ -1521,6 +1523,12 @@ void Asm::In::setpass3 ()
 {
 	lastpass= 3;
 }
+
+void Asm::In::snasmerrors()
+{
+	usesnasmerrors = true;
+}
+
 
 void Asm::In::addpredef (const std::string & predef)
 {
@@ -2667,9 +2675,21 @@ void Asm::In::processfile ()
 	}
 	catch (...)
 	{
-		* perr << "ERROR";
-		showcurrentlineinfo (* perr);
-		* perr << endl;
+		if (usesnasmerrors)
+		{
+			showcurrentlineinfo(*perr, usesnasmerrors);
+			//*perr << "ERROR";
+			//*perr << endl;
+
+		}
+		else
+		{
+			*perr << "ERROR";
+			showcurrentlineinfo(*perr, usesnasmerrors);
+			*perr << endl;
+
+		}
+
 		throw;
 	}
 }
@@ -3455,9 +3475,21 @@ byte Asm::In::parsedesp (Tokenizer & tz, bool bracket)
 
 void Asm::In::emitwarning (const std::string & text)
 {
-	* pwarn << "WARNING: " << text;
-	showcurrentlineinfo (* pwarn);
-	* pwarn << endl;
+	if (usesnasmerrors)
+	{
+		showcurrentlineinfo(*pwarn, usesnasmerrors);
+		*pwarn << "WARNING: " << text;
+		*pwarn << endl;
+
+	}
+	else
+	{
+		*pwarn << "WARNING: " << text;
+		showcurrentlineinfo(*pwarn, usesnasmerrors);
+		*pwarn << endl;
+
+	}
+
 }
 
 void Asm::In::no8080 ()
@@ -6443,9 +6475,21 @@ void Asm::In::expandMACRO (const std::string & name,
 	}
 	catch (...)
 	{
-		* perr << "ERROR expanding macro";
-		showlineinfo (* perr, mframe.getexpline () );
-		* perr << endl;
+		if (!usesnasmerrors)
+		{
+			*perr << "ERROR expanding macro";
+			showlineinfo(*perr, mframe.getexpline(),usesnasmerrors);
+			*perr << endl;
+
+		}
+		else
+		{
+			showlineinfo(*perr, mframe.getexpline(), usesnasmerrors);
+			*perr << "ERROR expanding macro";
+			*perr << endl;
+
+		}
+
 		throw;
 	}
 
@@ -7396,6 +7440,11 @@ void Asm::set86 ()
 void Asm::setpass3 ()
 {
 	pin->setpass3 ();
+}
+
+void Asm::snasmerrors()
+{
+	pin->snasmerrors();
 }
 
 void Asm::addincludedir (const std::string & dirname)

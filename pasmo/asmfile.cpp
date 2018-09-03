@@ -210,7 +210,7 @@ public:
 	void copyfile (FileRef & fr, std::ostream & outverb);
 	void loadfile (const std::string & filename, bool nocase,
 		std::ostream & outverb, std::ostream& outerr);
-	void showlineinfo (std::ostream & os, size_t nline) const;
+	void showlineinfo (std::ostream & os, size_t nline,bool usesnasmerrors = false) const;
 private:
 	In (const In &); // Forbidden.
 	In & operator = (const In &); // Forbidden.
@@ -430,8 +430,20 @@ void AsmFile::In::loadfile (const std::string & filename, bool nocase,
 	}
 	catch (...)
 	{
-		outerr << "ERROR on line " << linenum + 1 <<
-			" of file " << filename << endl;
+		//if (snasmerrors)
+		//{
+		//		outerr << "ERROR on line " << linenum + 1 <<
+		//			" of file " << filename << endl;
+		//
+		//
+		//}
+		//else
+		{
+			outerr << filename << "(" << linenum + 1 <<
+				") error: " << endl;
+
+		}
+
 		throw;
 	}
 
@@ -439,15 +451,26 @@ void AsmFile::In::loadfile (const std::string & filename, bool nocase,
 		" in " << numlines () << endl;
 }
 
-void AsmFile::In::showlineinfo (std::ostream & os, size_t nline) const
+void AsmFile::In::showlineinfo (std::ostream & os, size_t nline,bool usesnasmerrors) const
 {
 	ASSERT (nline < numlines () );
 
 	const LineContent & linf= getline (nline);
 	const FileRef & fileref= getfile (linf.getfilenum () );
 
-	os << " on line " << fileref.numline (linf.getfileline () ) + 1 <<
-		" of file " << fileref.name ();
+	if (usesnasmerrors)
+	{
+		os << fileref.name()<< "(" << fileref.numline(linf.getfileline()) + 1 <<
+			") ";
+
+	}
+	else
+	{
+		os << " on line " << fileref.numline(linf.getfileline()) + 1 <<
+			" of file " << fileref.name();
+	}
+
+
 }
 
 
@@ -574,17 +597,17 @@ void AsmFile::prevline ()
 	--currentline;
 }
 
-void AsmFile::showlineinfo (std::ostream & os, size_t nline) const
+void AsmFile::showlineinfo (std::ostream & os, size_t nline,bool usesnasmerrors) const
 {
-	in ().showlineinfo (os, nline);
+	in ().showlineinfo (os, nline, usesnasmerrors);
 }
 
-void AsmFile::showcurrentlineinfo (std::ostream & os) const
+void AsmFile::showcurrentlineinfo (std::ostream & os,bool usesnasmerrors) const
 {
 	if (passeof () )
 		os << " detected after end of file";
 	else
-		in ().showlineinfo (os, getline () );
+		in ().showlineinfo (os, getline () , usesnasmerrors);
 }
 
 // End of asmfile.cpp

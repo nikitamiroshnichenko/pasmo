@@ -30,6 +30,7 @@ public:
 	void warn8080 ();
 	void set86 ();
 	void setpass3 ();
+	void snasmerrors();
 
 	void addincludedir (const std::string & dirname);
 	void addpredef (const std::string & predef);

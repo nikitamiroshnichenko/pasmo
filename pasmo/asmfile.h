@@ -22,8 +22,8 @@ public:
 protected:
 	void openis (std::ifstream & is, const std::string & filename,
 		std::ios::openmode mode) const;
-	void showlineinfo (std::ostream & os, size_t nline) const;
-	void showcurrentlineinfo (std::ostream & os) const;
+	void showlineinfo (std::ostream & os, size_t nline,bool showlineinfo=false) const;
+	void showcurrentlineinfo (std::ostream & os,bool usesnasmerrors =false) const;
 	bool getvalidline ();
 	bool passeof () const;
 	Tokenizer & getcurrentline ();
