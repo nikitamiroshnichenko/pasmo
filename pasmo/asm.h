@@ -31,6 +31,8 @@ public:
 	void set86 ();
 	void setpass3 ();
 	void snasmerrors();
+	void tracedata();
+	void closetracedata();
 
 	void addincludedir (const std::string & dirname);
 	void addpredef (const std::string & predef);
@@ -62,6 +64,8 @@ public:
 	void dumppublic (std::ostream & out);
 	void dumpsymbol (std::ostream & out);
 	void dumpsymbolcspec(std::ostream & out);
+	void dumpsymboltrace();
+
 private:
 	Asm (const Asm & a); // Forbidden
 	void operator = (const Asm &); // Forbidden

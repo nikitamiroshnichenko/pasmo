@@ -76,6 +76,7 @@ const string optprl       ("--prl");
 const string optpublic    ("--public");
 const string optcspecsymbols ("--cspecsymbols");
 const string optsnasmerrors("--snasmerrors");
+const string opttracedata ("--tracedata");
 const string opttap       ("--tap");
 const string opttapbas    ("--tapbas");
 const string opttzx       ("--tzx");
@@ -98,6 +99,7 @@ public:
 	bool getpass3 () const { return pass3; }
 	bool getsnasmerrors() const { return snasmerrors; }
 	bool getcspecsymbols() const { return cspecsymbols; }
+	bool gettracedata() const { return tracedata; }
 	string getfilein () const { return filein; }
 	string getfileout () const { return fileout; }
 	string getfilesymbol () const { return filesymbol; }
@@ -123,6 +125,7 @@ private:
 	bool mode86;
 	bool pass3;
 	bool snasmerrors;
+	bool tracedata;
 
 	vector <string> includedir;
 	vector <string> labelpredef;
@@ -156,41 +159,43 @@ Options::Options (int argc, char * * argv) :
 	{
 		const string arg (argv [argpos] );
 		if (arg == optbin)
-			emitfunc= & Asm::emitobject;
+			emitfunc = &Asm::emitobject;
 		else if (arg == opthex)
-			emitfunc= & Asm::emithex;
+			emitfunc = &Asm::emithex;
 		else if (arg == optprl)
-			emitfunc= & Asm::emitprl;
+			emitfunc = &Asm::emitprl;
 		else if (arg == optcmd)
-			emitfunc= & Asm::emitcmd;
+			emitfunc = &Asm::emitcmd;
 		else if (arg == optpass3)
-			pass3= true;
+			pass3 = true;
 		else if (arg == optplus3dos)
-			emitfunc= & Asm::emitplus3dos;
+			emitfunc = &Asm::emitplus3dos;
 		else if (arg == opttap)
-			emitfunc= & Asm::emittap;
+			emitfunc = &Asm::emittap;
 		else if (arg == opttzx)
-			emitfunc= & Asm::emittzx;
+			emitfunc = &Asm::emittzx;
 		else if (arg == optcdt)
-			emitfunc= & Asm::emitcdt;
+			emitfunc = &Asm::emitcdt;
 		else if (arg == opttapbas)
-			emitfunc= & Asm::emittapbas;
+			emitfunc = &Asm::emittapbas;
 		else if (arg == opttzxbas)
-			emitfunc= & Asm::emittzxbas;
+			emitfunc = &Asm::emittzxbas;
 		else if (arg == optcdtbas)
-			emitfunc= & Asm::emitcdtbas;
+			emitfunc = &Asm::emitcdtbas;
 		else if (arg == optamsdos)
-			emitfunc= & Asm::emitamsdos;
+			emitfunc = &Asm::emitamsdos;
 		else if (arg == optmsx)
-			emitfunc= & Asm::emitmsx;
+			emitfunc = &Asm::emitmsx;
 		else if (arg == optsna)
-			emitfunc= & Asm::emitsna;
+			emitfunc = &Asm::emitsna;
 		else if (arg == optpublic)
-			emitpublic= true;
+			emitpublic = true;
 		else if (arg == optcspecsymbols)
 			cspecsymbols = true;
 		else if (arg == optsnasmerrors)
 			snasmerrors = true;
+		else if (arg == opttracedata)
+			tracedata = true;
 		else if (arg == optname)
 		{
 			++argpos;
@@ -305,6 +310,8 @@ void Options::apply (Asm & assembler) const
 		assembler.setpass3 ();
 	if (snasmerrors)
 		assembler.snasmerrors();
+	if (tracedata)
+		assembler.tracedata();
 
 	for (size_t i= 0; i < includedir.size (); ++i)
 		assembler.addincludedir (includedir [i] );
@@ -337,6 +344,7 @@ int doit (int argc, char * * argv)
 	assembler.loadfile (option.getfilein () ,option.getsnasmerrors());
 	assembler.processfile ();
 
+
 	// Generate ouptut file.
 
 	std::ofstream out (option.getfileout ().c_str (),
@@ -363,6 +371,7 @@ int doit (int argc, char * * argv)
 			cout_buf= cout.rdbuf ();
 			cout.rdbuf (sout.rdbuf () );
 		}
+
 
 		if (option.getcspecsymbols())
 			assembler.dumpsymbolcspec(cout);
@@ -395,6 +404,14 @@ int doit (int argc, char * * argv)
 			sout.close ();
 		}
 	}
+
+	if (option.gettracedata())
+	{
+		assembler.dumpsymboltrace();
+
+		assembler.closetracedata();
+	}
+
 
 	auto finish = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = finish - start;

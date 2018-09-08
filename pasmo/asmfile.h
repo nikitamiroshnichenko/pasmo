@@ -24,6 +24,9 @@ protected:
 		std::ios::openmode mode) const;
 	void showlineinfo (std::ostream & os, size_t nline,bool showlineinfo=false) const;
 	void showcurrentlineinfo (std::ostream & os,bool usesnasmerrors =false) const;
+
+	void DoTraceInfo(std::ostream & os, int bank, address addr) const;
+
 	bool getvalidline ();
 	bool passeof () const;
 	Tokenizer & getcurrentline ();

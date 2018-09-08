@@ -211,6 +211,7 @@ public:
 	void loadfile (const std::string & filename, bool nocase,
 		std::ostream & outverb, std::ostream& outerr, bool usesnasmerrors = false);
 	void showlineinfo (std::ostream & os, size_t nline,bool usesnasmerrors = false) const;
+	void DoTrace(std::ostream & os, size_t nline, int bank, address addr) const;
 private:
 	In (const In &); // Forbidden.
 	In & operator = (const In &); // Forbidden.
@@ -474,6 +475,19 @@ void AsmFile::In::showlineinfo (std::ostream & os, size_t nline,bool usesnasmerr
 }
 
 
+void AsmFile::In::DoTrace(std::ostream & os, size_t nline, int bank, address addr) const
+{
+	ASSERT(nline < numlines());
+
+	const LineContent & linf = getline(nline);
+	const FileRef & fileref = getfile(linf.getfilenum());
+
+	os << fileref.name() << "|" << fileref.numline(linf.getfileline())+1 << "|" << bank << "|" << addr <<"|T" << std::endl;
+
+
+}
+
+
 //*******************************************************************
 
 
@@ -608,6 +622,17 @@ void AsmFile::showcurrentlineinfo (std::ostream & os,bool usesnasmerrors) const
 		os << " detected after end of file";
 	else
 		in ().showlineinfo (os, getline () , usesnasmerrors);
+}
+
+
+void AsmFile::DoTraceInfo(std::ostream & os,int bank,address addr) const
+{
+
+
+	if (passeof())
+		os << " detected after end of file";
+	else
+		in().DoTrace(os, getline(),bank,addr);
 }
 
 // End of asmfile.cpp

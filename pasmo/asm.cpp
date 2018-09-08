@@ -917,6 +917,8 @@ public:
 	void set86 ();
 	void setpass3 ();
 	void snasmerrors();
+	void tracedata();
+	void closetracedata();
 
 	void addpredef (const std::string & predef);
 	void setheadername (const std::string & headername_n);
@@ -960,6 +962,7 @@ public:
 	void emitmsx (std::ostream & out);
 	void dumppublic (std::ostream & out);
 	void dumpsymbol (std::ostream & out);
+	void dumpsymboltrace();
 	void dumpsymbolcspec(std::ostream & out);
 private:
 	void operator = (const Asm::In &); // Forbidden.
@@ -1242,6 +1245,9 @@ private:
 	std::ostream * perr;
 	std::ostream * pverb;
 	std::ostream * pwarn;
+	std::ostream * ptrace;
+
+	std::ofstream tracestream;
 
 	// ********* Local **********
 
@@ -1430,6 +1436,7 @@ Asm::In::In () :
 	perr (& cerr),
 	pverb (& nullout),
 	pwarn (& cerr),
+	ptrace (& nullout),
 	localcount (0),
 	pcurrentmframe (0)
 {
@@ -1455,6 +1462,7 @@ Asm::In::In (const Asm::In & in) :
 	perr (in.perr),
 	pverb (in.pverb),
 	pwarn (in.pwarn),
+	ptrace(in.ptrace),
 	localcount (0),
 	pcurrentmframe (0)
 {
@@ -1528,6 +1536,31 @@ void Asm::In::snasmerrors()
 {
 	usesnasmerrors = true;
 }
+
+void Asm::In::tracedata()
+{
+	*perr << "OPEN TRACE DATA" << std::endl;
+
+
+	tracestream.open("tracedata.txt", std::ofstream::out | std::ofstream::trunc);
+
+	if (tracestream.is_open())
+	{
+		*perr << "TRACE DATA OPEN" << std::endl;
+
+		ptrace = &tracestream;
+	}
+}
+
+void Asm::In::closetracedata()
+{
+	if (tracestream.is_open())
+	{
+		tracestream.close();
+	}
+
+}
+
 
 
 void Asm::In::addpredef (const std::string & predef)
@@ -1608,6 +1641,9 @@ void Asm::In::showcode (const std::string & instruction)
 	const address bytesperline= 4;
 
 	address pos= currentinstruction;
+
+	DoTraceInfo(*ptrace, CurrentBank, pos);
+
 	const address posend= current;
 	bool instshowed= false;
 	for (address i= 0; pos != posend; ++i, ++pos)
@@ -1634,6 +1670,10 @@ void Asm::In::showcode (const std::string & instruction)
 		* pout << '\t' << instruction;
 	}
 	* pout << endl;
+
+
+
+
 
 	// Check that the 64KB limit has not been exceeded in the
 	// middle of an instruction.
@@ -2644,11 +2684,11 @@ void Asm::In::processfile ()
 {
 	TRF;
 
-	//reset bank num,ber on each pass
-	CurrentBank = 0;
 
 	try 
 	{
+		//reset bank num,ber on each pass
+		CurrentBank = 0;
 		pass= 1;
 		if (debugtype == DebugAll)
 			pout= & cout;
@@ -2656,6 +2696,8 @@ void Asm::In::processfile ()
 			pout= & nullout;
 		dopass ();
 
+		//reset bank num,ber on each pass
+		CurrentBank = 0;
 		pass= 2;
 		if (debugtype != NoDebug)
 			pout= & cout;
@@ -2666,6 +2708,8 @@ void Asm::In::processfile ()
 		// Testing third pass
 		if (lastpass > 2)
 		{
+			//reset bank num,ber on each pass
+			CurrentBank = 0;
 			pass= 3;
 			dopass ();
 		}
@@ -7390,6 +7434,28 @@ void Asm::In::dumpsymbolcspec(std::ostream & out)
 
 	}
 }
+void Asm::In::dumpsymboltrace()
+{
+	for (mapvar_t::iterator it = mapvar.begin();
+		it != mapvar.end();
+		++it)
+	{
+		const VarData & vd = it->second;
+		// Dump only EQU and label valid symbols.
+		if (vd.def() != DefinedPass2)
+			continue;
+
+		//const LineContent & linf = getline(nline);
+		//const FileRef & fileref = getfile(linf.getfilenum());
+
+		//os << fileref.name() << "|" << fileref.numline(linf.getfileline()) + 1 << "|" << bank << "|" << addr << "|T" << std::endl;
+
+
+		*ptrace << it->first << "||"<<vd.getbank() << "|"<< vd.getvalue() << "|L"  << endl;
+
+	}
+}
+
 
 //*********************************************************
 //			class Asm
@@ -7465,6 +7531,17 @@ void Asm::snasmerrors()
 {
 	pin->snasmerrors();
 }
+
+void Asm::tracedata()
+{
+	pin->tracedata();
+}
+
+void Asm::closetracedata()
+{
+	pin->closetracedata();
+}
+
 
 void Asm::addincludedir (const std::string & dirname)
 {
@@ -7561,6 +7638,12 @@ void Asm::emitsna(std::ostream & out)
 void Asm::dumppublic (std::ostream & out)
 {
 	pin->dumppublic (out);
+}
+
+
+void Asm::dumpsymboltrace()
+{
+	pin->dumpsymboltrace();
 }
 
 void Asm::dumpsymbol (std::ostream & out)
