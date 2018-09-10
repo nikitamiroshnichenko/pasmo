@@ -772,13 +772,15 @@ public:
 		value (0),
 		defined (NoDefined),
 		local (makelocal),
-		bank(0)
+		bank(0),
+		isFunction(true)
 	{ }
 	VarData (address valuen, Defined definedn,int bankn) :
 		value (valuen),
 		defined (definedn),
 		local (false),
-		bank(bankn)
+		bank(bankn),
+		isFunction(true)
 	{ }
 	void set (address valuen, Defined definedn, int bankn)
 	{
@@ -791,6 +793,7 @@ public:
 		value= 0;
 		defined= NoDefined;
 		bank = 0;
+		isFunction = true;
 	}
 	address getvalue () const
 	{
@@ -808,11 +811,22 @@ public:
 	{
 		return local;
 	}
+	void SetisFunction(bool f)
+	{
+		isFunction = f;
+	}
+
+	bool GetisFunction() const
+	{
+		return (isFunction);
+	}
+
 private:
 	address value;
 	Defined defined;
 	bool local;
 	int bank;
+	bool isFunction;   //if true then this label is only used on calls , JP and JR instructions so we assume its a function , defaults to true
 };
 
 
@@ -986,6 +1000,9 @@ private:
 	address getvalue (const std::string & var,
 		bool required, bool ignored);
 
+	void setvalueIsFunction(const std::string & var, bool isfunction);
+
+
 	int getvaluebank(const std::string & var,
 		bool required, bool ignored);
 
@@ -994,8 +1011,10 @@ private:
 	// Expression evaluation.
 
 	bool isdefined (const std::string & varname);
+
+
 	void parsevalue (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored,bool flowcontrol);
 
 	void parsebankvalue(Tokenizer & tz, address & result,
 		bool required, bool ignored);
@@ -1003,38 +1022,38 @@ private:
 
 	void expectclose (Tokenizer & tz);
 	void parseopen (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 
 	void parsemuldiv (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parseplusmin (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parserelops (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parsenot (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parseand (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parseorxor (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parsebooland (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parseboolor (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parsehighlow (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parsegetbank(Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 
 	
 
 
 	void parsecond (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 	void parsebase (Tokenizer & tz, address & result,
-		bool required, bool ignored);
+		bool required, bool ignored, bool flowcontrol);
 
-	address parseexpr (bool required, const Token & tok, Tokenizer & tz);
+	address parseexpr (bool required, const Token & tok, Tokenizer & tz, bool flowcontrol);
 
 	// Check required tokens.
 
@@ -1807,6 +1826,16 @@ int Asm::In::getvaluebank(const std::string & var,
 }
 
 
+void Asm::In::setvalueIsFunction(const std::string & var, bool isfunction)
+{
+	VarData & vd = mapvar[var];
+
+	if (vd.def() != NoDefined)
+	{
+		vd.SetisFunction(isfunction);
+	}
+}
+
 address Asm::In::getvalue (const std::string & var,
 	bool required, bool ignored)
 {
@@ -1846,7 +1875,7 @@ bool Asm::In::isdefined (const std::string & varname)
 }
 
 void Asm::In::parsevalue (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored,bool flowcontrol)
 {
 	TRF;
 
@@ -1858,6 +1887,12 @@ void Asm::In::parsevalue (Tokenizer & tz, address & result,
 		break;
 	case TypeIdentifier:
 		result= getvalue (tok.str (), required, ignored);
+
+		if (!flowcontrol)
+		{
+			setvalueIsFunction(tok.str(),false);
+		}
+
 		break;
 	case TypeDollar:
 	case TypePC:
@@ -1899,25 +1934,25 @@ void Asm::In::expectclose (Tokenizer & tz)
 }
 
 void Asm::In::parseopen (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 	Token tok= tz.gettoken ();
 	if (tok.type () == TypeOpen)
 	{
-		parsebase (tz, result, required, ignored);
+		parsebase (tz, result, required, ignored,  flowcontrol);
 		expectclose (tz);
 	}
 	else
 	{
 		tz.ungettoken ();
-		parsevalue (tz, result, required, ignored);
+		parsevalue (tz, result, required, ignored,  flowcontrol);
 	}
 }
 
 void Asm::In::parsemuldiv (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
-	parseopen (tz, result, required, ignored);
+	parseopen (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	TypeToken tt= tok.type ();
 	while (
@@ -1928,7 +1963,7 @@ void Asm::In::parsemuldiv (Tokenizer & tz, address & result,
 		)
 	{
 		address guard;
-		parseopen (tz, guard, required, ignored);
+		parseopen (tz, guard, required, ignored,  flowcontrol);
 		switch (tt)
 		{
 		case TypeMult:
@@ -1976,15 +2011,15 @@ void Asm::In::parsemuldiv (Tokenizer & tz, address & result,
 }
 
 void Asm::In::parseplusmin (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
-	parsemuldiv (tz, result, required, ignored);
+	parsemuldiv (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	TypeToken tt= tok.type ();
 	while (tt == TypePlus || tt == TypeMinus)
 	{
 		address guard;
-		parsemuldiv (tz, guard, required, ignored);
+		parsemuldiv (tz, guard, required, ignored,  flowcontrol);
 		switch (tt)
 		{
 		case TypePlus:
@@ -2004,9 +2039,9 @@ void Asm::In::parseplusmin (Tokenizer & tz, address & result,
 }
 
 void Asm::In::parserelops (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
-	parseplusmin (tz, result, required, ignored);
+	parseplusmin (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	TypeToken tt= tok.type ();
 	while (
@@ -2019,7 +2054,7 @@ void Asm::In::parserelops (Tokenizer & tz, address & result,
 		)
 	{
 		address guard;
-		parseplusmin (tz, guard, required, ignored);
+		parseplusmin (tz, guard, required, ignored,  flowcontrol);
 		switch (tt)
 		{
 		case TypeEQ:
@@ -2057,7 +2092,7 @@ void Asm::In::parserelops (Tokenizer & tz, address & result,
 }
 
 void Asm::In::parsenot (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 	Token tok= tz.gettoken ();
 	TypeToken tt= tok.type ();
@@ -2068,7 +2103,7 @@ void Asm::In::parsenot (Tokenizer & tz, address & result,
 		tt == TypePlus || tt == TypeMinus
 		)
 	{
-		parsenot (tz, result, required, ignored);
+		parsenot (tz, result, required, ignored,  flowcontrol);
 		switch (tt)
 		{
 		case TypeNOT:
@@ -2091,20 +2126,20 @@ void Asm::In::parsenot (Tokenizer & tz, address & result,
 	else
 	{
 		tz.ungettoken ();
-		parserelops (tz, result, required, ignored);
+		parserelops (tz, result, required, ignored,  flowcontrol);
 	}
 }
 
 void Asm::In::parseand (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
-	parsenot (tz, result, required, ignored);
+	parsenot (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	TypeToken tt= tok.type ();
 	while (tt == TypeAND || tt == TypeBitAnd)
 	{
 		address guard;
-		parsenot (tz, guard, required, ignored);
+		parsenot (tz, guard, required, ignored,  flowcontrol);
 		result&= guard;
 		tok= tz.gettoken ();
 		tt= tok.type ();
@@ -2113,15 +2148,15 @@ void Asm::In::parseand (Tokenizer & tz, address & result,
 }
 
 void Asm::In::parseorxor (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
-	parseand (tz, result, required, ignored);
+	parseand (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	TypeToken tt= tok.type ();
 	while (tt == TypeOR || tt == TypeBitOr || tt == TypeXOR)
 	{
 		address guard;
-		parseand (tz, guard, required, ignored);
+		parseand (tz, guard, required, ignored,  flowcontrol);
 		switch (tt)
 		{
 		case TypeOR:
@@ -2142,11 +2177,11 @@ void Asm::In::parseorxor (Tokenizer & tz, address & result,
 }
 
 void Asm::In::parsebooland (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 	// Short-circuit evaluated boolean and operator.
 
-	parseorxor (tz, result, required, ignored);
+	parseorxor (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	if (tok.type () == TypeBoolAnd)
 	{
@@ -2155,7 +2190,7 @@ void Asm::In::parsebooland (Tokenizer & tz, address & result,
 		{
 			address guard;
 			parseorxor (tz, guard, required,
-				ignored || ! boolresult);
+				ignored || ! boolresult,  flowcontrol);
 			boolresult&= guard != 0;
 			tok= tz.gettoken ();
 		} while (tok.type () == TypeBoolAnd);
@@ -2165,11 +2200,11 @@ void Asm::In::parsebooland (Tokenizer & tz, address & result,
 }
 
 void Asm::In::parseboolor (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 	// Short-circuit evaluated boolean or operator.
 
-	parsebooland (tz, result, required, ignored);
+	parsebooland (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	if (tok.type () == TypeBoolOr)
 	{
@@ -2178,7 +2213,7 @@ void Asm::In::parseboolor (Tokenizer & tz, address & result,
 		{
 			address guard;
 			parsebooland (tz, guard, required,
-				ignored || boolresult);
+				ignored || boolresult,  flowcontrol);
 			boolresult|= guard != 0;
 			tok= tz.gettoken ();
 		} while (tok.type () == TypeBoolOr);
@@ -2188,33 +2223,33 @@ void Asm::In::parseboolor (Tokenizer & tz, address & result,
 }
 
 void Asm::In::parsehighlow (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 	Token tok= tz.gettoken ();
 	switch (tok.type () )
 	{
 
 	case TypeHIGH:
-		parsehighlow (tz, result, required, ignored);
+		parsehighlow (tz, result, required, ignored,  flowcontrol);
 		result= hibyte (result);
 		break;
 	case TypeLOW:
-		parsehighlow (tz, result, required, ignored);
+		parsehighlow (tz, result, required, ignored,  flowcontrol);
 		result= lobyte (result);
 		break;
 
 	case TypeGETBANK:
-		parsegetbank(tz, result, required, ignored);
+		parsegetbank(tz, result, required, ignored,  flowcontrol);
 		break;
 	default:
 		tz.ungettoken ();
-		parseboolor (tz, result, required, ignored);
+		parseboolor (tz, result, required, ignored,  flowcontrol);
 	}
 }
 
 
 void Asm::In::parsegetbank(Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 	Token tok = tz.gettoken();
 	switch (tok.type())
@@ -2248,47 +2283,47 @@ void Asm::In::parsebankvalue(Tokenizer & tz, address & result,
 
 
 void Asm::In::parsecond (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 
 	//parsegetbank(tz, result, required, ignored);
 
-	parsehighlow (tz, result, required, ignored);
+	parsehighlow (tz, result, required, ignored,  flowcontrol);
 	Token tok= tz.gettoken ();
 	if (tok.type () != TypeQuestion)
 		tz.ungettoken ();
 	else
 	{
 		bool usefirst= (result != 0);
-		parsebase (tz, result, required, ignored || ! usefirst);
+		parsebase (tz, result, required, ignored || ! usefirst,  flowcontrol);
 
 		tok= tz.gettoken ();
 		checktoken (TypeColon, tok);
 
 		address second;
-		parsebase (tz, second, required, ignored || usefirst);
+		parsebase (tz, second, required, ignored || usefirst,  flowcontrol);
 		if (! usefirst)
 			result= second;
 	}
 }
 
 void Asm::In::parsebase (Tokenizer & tz, address & result,
-	bool required, bool ignored)
+	bool required, bool ignored, bool flowcontrol)
 {
 	// This funtions is just an auxiliar to minimize changes
 	// when adding or modifying operators.
 
-	parsecond (tz, result, required, ignored);
+	parsecond (tz, result, required, ignored,  flowcontrol);
 }
 
 address Asm::In::parseexpr (bool required, const Token & /* tok */,
-	Tokenizer & tz)
+	Tokenizer & tz, bool flowcontrol)
 {
 	TRF;
 
 	tz.ungettoken ();
 	address result;
-	parsebase (tz, result, required, false);
+	parsebase (tz, result, required, false, flowcontrol);
 	return result;
 }
 
@@ -2350,7 +2385,7 @@ void Asm::In::parseIF (Tokenizer & tz)
 {
 	address v;
 	Token tok= tz.gettoken ();
-	v= parseexpr (true, tok, tz);
+	v= parseexpr (true, tok, tz,false);
 	checkendline (tz);
 	if (v != 0)
 	{
@@ -3017,7 +3052,7 @@ void Asm::In::parseORG (Tokenizer & tz, const std::string & label)
 	TRF;
 
 	Token tok= tz.gettoken ();
-	address org= parseexpr (true, tok, tz);
+	address org= parseexpr (true, tok, tz,false);
 	current= org;
 
 
@@ -3032,7 +3067,7 @@ void Asm::In::parseSTACK(Tokenizer & tz, const std::string & label)
 	TRF;
 
 	Token tok = tz.gettoken();
-	address stack = parseexpr(true, tok, tz);
+	address stack = parseexpr(true, tok, tz,false);
 	stacktop = stack;
 
 	*pout << "\t\tSTACK " << hex4(stack) << endl;
@@ -3079,7 +3114,7 @@ void Asm::In::parseEQU (Tokenizer & tz, const std::string & label)
 	TRF;
 
 	Token tok= tz.gettoken ();
-	address value= parseexpr (false, tok, tz);
+	address value= parseexpr (false, tok, tz,false);
 	checkendline (tz);
 	bool islocal= setequorlabel (label, value);
 	* pout << tablabel (label) << "EQU ";
@@ -3091,7 +3126,7 @@ void Asm::In::parseEQU (Tokenizer & tz, const std::string & label)
 void Asm::In::parseDEFL (Tokenizer & tz, const std::string & label)
 {
 	Token tok= tz.gettoken ();
-	address value= parseexpr (false, tok, tz);
+	address value= parseexpr (false, tok, tz,false);
 	checkendline (tz);
 	bool islocal= setdefl (label, value);
 	* pout << label << "\t\tDEFL ";
@@ -3136,7 +3171,7 @@ void Asm::In::parseEND (Tokenizer & tz)
 		* pout << hex4 (current) << ":\t\tEND" << endl;
 	else
 	{
-		address end= parseexpr (false, tok, tz);
+		address end= parseexpr (false, tok, tz,false);
 		checkendline (tz);
 		* pout << hex4 (current) << ":\t\tEND " << hex4 (end) << endl;
 		setentrypoint (end);
@@ -3491,7 +3526,7 @@ byte Asm::In::parsedesp (Tokenizer & tz, bool bracket)
 	case TypePlus:
 		tok= tz.gettoken ();
 		{
-			address addr= parseexpr (false, tok, tz);
+			address addr= parseexpr (false, tok, tz,false);
 			// We allow positive greater than 127 just in
 			// case someone uses hexadecimals such as 0FFh
 			// as offsets.
@@ -3504,7 +3539,7 @@ byte Asm::In::parsedesp (Tokenizer & tz, bool bracket)
 	case TypeMinus:
 		tok= tz.gettoken ();
 		{
-			address addr= parseexpr (false, tok, tz);
+			address addr= parseexpr (false, tok, tz,false);
 			if (addr > 128)
 				throw OffsetOutOfRange;
 			desp= static_cast <byte> (256 - addr);
@@ -3673,7 +3708,7 @@ void Asm::In::dobyteinmediate (Tokenizer & tz, byte code,
 	bool check= (! bracketonlymode) && pass >= 2 &&
 		tok.type () == TypeOpen;
 
-	address value= parseexpr (false, tok, tz);
+	address value= parseexpr (false, tok, tz,false);
 	checkendline (tz);
 
 	if (check && tz.endswithparen () )
@@ -3788,7 +3823,7 @@ void Asm::In::dobyteparamCB (Tokenizer & tz, byte codereg,
 void Asm::In::parseIM (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
-	address v= parseexpr (true, tok, tz);
+	address v= parseexpr (true, tok, tz,false);
 	byte code;
 	switch (v)
 	{
@@ -3814,7 +3849,7 @@ void Asm::In::parseIM (Tokenizer & tz)
 void Asm::In::parseRST (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
-	address addr= parseexpr (true, tok, tz);
+	address addr= parseexpr (true, tok, tz,false);
 	checkendline (tz);
 
 	if (addr & ~ static_cast <address> (0x38) )
@@ -3832,7 +3867,7 @@ void Asm::In::parseRST (Tokenizer & tz)
 void Asm::In::parseLDA_nn_ (Tokenizer & tz, bool bracket)
 {
 	Token tok;
-	address addr= parseexpr (false, tok, tz);
+	address addr= parseexpr (false, tok, tz,false);
 	expectcloseindir (tz, bracket);
 
 	byte code= mode86 ? 0xA0 : 0x3A;
@@ -4116,7 +4151,7 @@ void Asm::In::parseLDdouble_nn_ (Tokenizer & tz, regwCode regcode,
 	TRF;
 
 	Token tok= tz.gettoken ();
-	address value= parseexpr (false, tok, tz);
+	address value= parseexpr (false, tok, tz,false);
 	expectcloseindir (tz, bracket);
 	checkendline (tz);
 
@@ -4176,7 +4211,7 @@ void Asm::In::parseLDdoublenn (Tokenizer & tz,
 	TRF;
 
 	Token tok;
-	address value= parseexpr (false, tok, tz);
+	address value= parseexpr (false, tok, tz,false);
 	checkendline (tz);
 
 	if (prefix != NoPrefix)
@@ -4335,7 +4370,7 @@ void Asm::In::parseLD_IrPlus (Tokenizer & tz, bool bracket, byte prefix)
 	{
 		// LD (IX+des), n / LD (IY+des), n
 
-		address addr= parseexpr (false, tok, tz);
+		address addr= parseexpr (false, tok, tz,false);
 		checkendline (tz);
 		no86 ();
 
@@ -4350,7 +4385,7 @@ void Asm::In::parseLD_IrPlus (Tokenizer & tz, bool bracket, byte prefix)
 void Asm::In::parseLD_nn_ (Tokenizer & tz, bool bracket)
 {
 	Token tok;
-	address addr= parseexpr (false, tok, tz);
+	address addr= parseexpr (false, tok, tz,false);
 	expectcloseindir (tz, bracket);
 	expectcomma (tz);
 	tok= tz.gettoken ();
@@ -4703,7 +4738,7 @@ void Asm::In::parseADDBCDE (Tokenizer & tz, byte prefix, byte basecode)
         {
             no86 ();
             gencodeED (basecode + 0x03);
-            address value= parseexpr (true, tok, tz);
+            address value= parseexpr (true, tok, tz,false);
             gendataword (value);
             showcode ("ADD HL" + std::string(basecode == codeADDBC ? "BC" : "DE") + ", " + hex4str(value));
             no8080 ();
@@ -4734,7 +4769,7 @@ void Asm::In::parseADDDEHL (Tokenizer & tz)
     case TypeNumber:
         {
             gencodeED (0x3B);
-            address value= parseexpr (true, tok, tz);
+            address value= parseexpr (true, tok, tz,false);
             gendataword (value);
             showcode ("ADD DEHL, " +  hex4str(value));
         }
@@ -4790,7 +4825,7 @@ void Asm::In::parseADDADCSBCHL (Tokenizer & tz, byte prefix, byte basecode)
         {
             no86 ();
             gencodeED (0x34);
-            address value= parseexpr (true, tok, tz);
+            address value= parseexpr (true, tok, tz,false);
             gendataword (value);
             showcode ("ADD HL, " + hex4str(value));
             no8080 ();
@@ -4968,7 +5003,7 @@ void Asm::In::parsePUSHPOP (Tokenizer & tz, bool isPUSH)
     		ASSERT (isPUSH);
     		no86 ();
             gencodeED (0x8A);
-            address value = parseexpr (true, tok, tz);
+            address value = parseexpr (true, tok, tz,false);
     		gendataword (value);
         	showcode (std::string ("PUSH") + ' ' + hex4str (value) );
             no8080 ();
@@ -5072,7 +5107,7 @@ void Asm::In::parseCALL (Tokenizer & tz)
 	}
 
 
-	const address addr= parseexpr (false, tok, tz);
+	const address addr= parseexpr (false, tok, tz,true);
 	checkendline (tz);
 
 	if (mode86)
@@ -5234,7 +5269,7 @@ void Asm::In::parseJP (Tokenizer & tz)
 		tok= tz.gettoken ();
 	}
 
-	const address addr= parseexpr (false, tok, tz);
+	const address addr= parseexpr (false, tok, tz,true);
 	checkendline (tz);
 
 	if (mode86)
@@ -5273,7 +5308,7 @@ void Asm::In::parserelative (Tokenizer & tz, Token tok, byte code,
 {
 	// Use by JR and DJNZ.
 
-	address addr= parseexpr (false, tok, tz);
+	address addr= parseexpr (false, tok, tz,true);
 	checkendline (tz);
 	int dif= 0;
 	if (pass >= 2)
@@ -5332,7 +5367,7 @@ void Asm::In::parseDJNZ (Tokenizer & tz)
 	}
 	else
 	{
-		address addr= parseexpr (false, tok, tz);
+		address addr= parseexpr (false, tok, tz,true);
 		checkendline (tz);
 		int dif= 0;
 		if (pass >= 2)
@@ -5641,7 +5676,7 @@ void Asm::In::parseIN (Tokenizer & tz)
 			}
 			else
 			{
-				address addr= parseexpr (false, tok, tz);
+				address addr= parseexpr (false, tok, tz,false);
 				byte b= static_cast <byte> (addr);
 				code= mode86 ? 0xE4 : 0xDB;
 				gencode (code, b);
@@ -5678,7 +5713,7 @@ void Asm::In::parseOUT (Tokenizer & tz)
 	Token tok= tz.gettoken ();
 	if (tok.type () != TypeC)
 	{
-		address addr= parseexpr (false, tok, tz);
+		address addr= parseexpr (false, tok, tz,false);
 		byte b= static_cast <byte> (addr);
 		expectcloseindir (tz, bracket);
 		expectcomma (tz);
@@ -5729,7 +5764,7 @@ void Asm::In::parseOUT (Tokenizer & tz)
 void Asm::In::dobit (Tokenizer & tz, byte basecode, std::string instrname)
 {
 	Token tok= tz.gettoken ();
-	address addr= parseexpr (false, tok, tz);
+	address addr= parseexpr (false, tok, tz,false);
 	if (addr > 7)
 		throw BitOutOfRange;
 	expectcomma (tz);
@@ -5790,7 +5825,7 @@ void Asm::In::parseNextReg (Tokenizer & tz)
 
 	if (tok.type () == TypeNumber)
 	{
-    	byte reg= parseexpr (true, tok, tz);
+    	byte reg= parseexpr (true, tok, tz,false);
     	expectcomma (tz);
 	    Token tok= tz.gettoken ();
 
@@ -5815,7 +5850,7 @@ void Asm::In::parseNextReg (Tokenizer & tz)
 
         	gencodeED (0x91);
             gendata (reg);
-        	byte value= parseexpr (false, tok, tz);
+        	byte value= parseexpr (false, tok, tz,false);
             gendata (value);
         	showcode ("NEXTREG " + hex2str (reg) + ", " + hex2str (value));
 
@@ -5833,7 +5868,7 @@ void Asm::In::parseNextReg (Tokenizer & tz)
 			gencodeED(0x91);
 			gendata(reg);
 			address result;
-			parsebankvalue(tz, result, false, false);
+			parsebankvalue(tz, result, false,false);
 
 			//byte value = parseexpr(false, tok, tz);
 			gendata(result);
@@ -5862,7 +5897,7 @@ void Asm::In::parseTest (Tokenizer & tz)
 
     no86 ();
     gencodeED (0x27);
-    byte value= parseexpr (true, tok, tz);
+    byte value= parseexpr (true, tok, tz,false);
     gendata (value);
     showcode ("TEST " + hex2str (value));
     no8080 ();
@@ -5887,7 +5922,7 @@ void Asm::In::parseDEFB (Tokenizer & tz)
 				if (l == 1)
 				{
 					// Admit expressions like 'E' + 80H
-					gendata (parseexpr (false, tok, tz) );
+					gendata (parseexpr (false, tok, tz,false) );
 					++count;
 					break;
 				}
@@ -5899,7 +5934,7 @@ void Asm::In::parseDEFB (Tokenizer & tz)
 			}
 			break;
 		default:
-			gendata (parseexpr (false, tok, tz) );
+			gendata (parseexpr (false, tok, tz,false) );
 			++count;
 		}
 		tok= tz.gettoken ();
@@ -5923,7 +5958,7 @@ void Asm::In::parseDEFW (Tokenizer & tz)
 	for (;;)
 	{
 		Token tok= tz.gettoken ();
-		gendataword (parseexpr (false, tok, tz) );
+		gendataword (parseexpr (false, tok, tz,false) );
 		++count;
 		tok= tz.gettoken ();
 		if (tok.type () == TypeEndLine)
@@ -5939,14 +5974,14 @@ void Asm::In::parseDEFW (Tokenizer & tz)
 void Asm::In::parseDEFS (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
-	address count= parseexpr (true, tok, tz);
+	address count= parseexpr (true, tok, tz,false);
 	byte value= 0;
 	tok= tz.gettoken ();
 	if (tok.type () != TypeEndLine)
 	{
 		checktoken (TypeComma, tok);
 		tok= tz.gettoken ();
-		address calcvalue= parseexpr (false, tok, tz);
+		address calcvalue= parseexpr (false, tok, tz,false);
 		checkendline (tz);
 		value= static_cast <byte> (calcvalue);
 	}
@@ -5988,7 +6023,7 @@ void Asm::In::parseBANK(Tokenizer & tz)
 {
 
 	Token tok = tz.gettoken();
-	address value = parseexpr(false, tok, tz);
+	address value = parseexpr(false, tok, tz,false);
 	checkendline(tz);
 	bool islocal = setdefl("CURRENTBANK", value);
 	*pout <<"\t\tBANK "<< hex4(value) << endl;
@@ -6011,13 +6046,13 @@ void Asm::In::parseSAVEBIN(Tokenizer & tz)
 		Token tok = tz.gettoken();
 		if (tok.type() == TypeNumber || tok.type() == TypeIdentifier)
 		{
-			addr = parseexpr(true, tok, tz);
+			addr = parseexpr(true, tok, tz,false);
 			expectcomma(tz);
 
 			Token tok = tz.gettoken();
 			if (tok.type() == TypeNumber || tok.type() == TypeIdentifier)
 			{
-				size = parseexpr(true, tok, tz);
+				size = parseexpr(true, tok, tz,false);
 			}
 
 			*pout << "\t\tSAVEBIN " << savefile << " " << addr << " " << size << endl;
@@ -6564,7 +6599,7 @@ void Asm::In::expandMACRO (const std::string & name,
 void Asm::In::parseREPT (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
-	const address numrep= parseexpr (true, tok, tz);
+	const address numrep= parseexpr (true, tok, tz,false);
 
 	// Adding new option for counter variable.
 	//checkendline (tz);
@@ -6586,13 +6621,13 @@ void Asm::In::parseREPT (Tokenizer & tz)
 		{
 			checktoken (TypeComma, tok);
 			tok= tz.gettoken ();
-			valuecounter= parseexpr (true, tok, tz);
+			valuecounter= parseexpr (true, tok, tz,false);
 			tok= tz.gettoken ();
 			if (tok.type () != TypeEndLine)
 			{
 				checktoken (TypeComma, tok);
 				tok= tz.gettoken ();
-				step= parseexpr (true, tok, tz);
+				step= parseexpr (true, tok, tz,false);
 				checkendline (tz);
 			}
 		}
@@ -7450,8 +7485,19 @@ void Asm::In::dumpsymboltrace()
 
 		//os << fileref.name() << "|" << fileref.numline(linf.getfileline()) + 1 << "|" << bank << "|" << addr << "|T" << std::endl;
 
+		if (vd.GetisFunction())
+		{
+			//means its a function label, e.g. it only gets refs in calls or JP or DJNZ etc..
+			*ptrace << it->first << "||" << vd.getbank() << "|" << vd.getvalue() << "|F" << endl;
 
-		*ptrace << it->first << "||"<<vd.getbank() << "|"<< vd.getvalue() << "|L"  << endl;
+		}
+		else
+		{
+			//means its a normal label
+			*ptrace << it->first << "||" << vd.getbank() << "|" << vd.getvalue() << "|L" << endl;
+		}
+
+
 
 	}
 }
