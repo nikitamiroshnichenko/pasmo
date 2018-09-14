@@ -59,6 +59,9 @@ std::string hex2str (byte b);
 std::string hex4str (address n);
 std::string hex8str (size_t nn);
 
+int GetBank(int addr);
+
+
 inline std::string hex2str (sbyte b)
 { return hex2str (static_cast <byte> (b) ); }
 inline std::string hex2str (char b)
@@ -103,6 +106,9 @@ inline Hex2 hex2 (sbyte b) { return Hex2 (static_cast <byte> (b) ); }
 inline Hex2 hex2 (char b) { return Hex2 (static_cast <byte> (b) ); }
 inline Hex4 hex4 (address n) { return Hex4 (n); }
 inline Hex8 hex8 (size_t nn) { return Hex8 (nn); }
+
+
+
 
 std::ostream & operator << (std::ostream & os, const Hex2 & h2);
 std::ostream & operator << (std::ostream & os, const Hex4 & h4);

@@ -72,6 +72,7 @@ logic_error MACROLostENDM ("Unexpected MACRO without ENDM");
 
 runtime_error ErrorReadingINCBIN ("Error reading INCBIN file");
 runtime_error ErrorRangeSAVEBIN("Error SAVEBIN out of range");
+runtime_error ErrorSETBANK("Error SETBANK Params");
 runtime_error ErrorSAVEBINwrite("Error SAVEBIN faled to write file");
 runtime_error ErrorHEXlength("Error HEX data not correct length");
 runtime_error ErrorHEXIllegal("Error HEX Data illegal characters");
@@ -1234,7 +1235,7 @@ private:
 	byte mem[65536]{};
 
 	int rsset = 0;
-	int CurrentBank = 0;
+	int CurrentBank[8] = { 256,256,10,11,4,5,0,1 };   //default banks
 
 	address base;
 	address current;
@@ -1655,13 +1656,14 @@ void Asm::In::gendataword (address dataword)
 	gendata (hibyte (dataword) );
 }
 
+
 void Asm::In::showcode (const std::string & instruction)
 {
 	const address bytesperline= 4;
 
 	address pos= currentinstruction;
 
-	DoTraceInfo(*ptrace, CurrentBank, pos);
+	DoTraceInfo(*ptrace, CurrentBank[ GetBank((int)pos) ] , pos);
 
 	const address posend= current;
 	bool instshowed= false;
@@ -1745,10 +1747,10 @@ void Asm::In::gencodeword (address value)
 bool Asm::In::setvar (const std::string & varname,
 	address value, Defined defined)
 {
-	TRFDEBS ("Set '" << varname << "' to " << value<<" in bank "<< CurrentBank);
+	TRFDEBS ("Set '" << varname << "' to " << value<<" in bank "<< CurrentBank[ GetBank((int)value) ] << "  bi:"<< GetBank((int)value));
 
 
-	*pout << "Set '" << varname << "' to " << value << " in bank " << CurrentBank << endl;
+	*pout << "Set '" << varname << "' to " << value << " in bank " << CurrentBank[GetBank((int)value)] << "  bi:" << GetBank((int)value) << endl;
 
 	checkautolocal (varname);
 	mapvar_t::iterator it= mapvar.find (varname);
@@ -1783,7 +1785,7 @@ bool Asm::In::setvar (const std::string & varname,
 		default:
 			/* Nothing */;
 		}
-		it->second.set (value, defined,CurrentBank);
+		it->second.set (value, defined, CurrentBank[GetBank((int)value)]);
 
 		#else
 
@@ -1795,7 +1797,7 @@ bool Asm::In::setvar (const std::string & varname,
 	else
 	{
 		mapvar.insert (make_pair (varname,
-			VarData (value, defined,CurrentBank) ) );
+			VarData (value, defined, CurrentBank[GetBank((int)value)]) ) );
 		return false;
 	}
 }
@@ -2723,7 +2725,16 @@ void Asm::In::processfile ()
 	try 
 	{
 		//reset bank num,ber on each pass
-		CurrentBank = 0;
+		CurrentBank[0] = 256;
+		CurrentBank[1] = 256;
+		CurrentBank[2] = 10;
+		CurrentBank[3] = 11;
+		CurrentBank[4] = 4;
+		CurrentBank[5] = 5;
+		CurrentBank[6] = 0;
+		CurrentBank[7] = 1;
+
+
 		pass= 1;
 		if (debugtype == DebugAll)
 			pout= & cout;
@@ -2732,7 +2743,14 @@ void Asm::In::processfile ()
 		dopass ();
 
 		//reset bank num,ber on each pass
-		CurrentBank = 0;
+		CurrentBank[0] = 256;
+		CurrentBank[1] = 256;
+		CurrentBank[2] = 10;
+		CurrentBank[3] = 11;
+		CurrentBank[4] = 4;
+		CurrentBank[5] = 5;
+		CurrentBank[6] = 0;
+		CurrentBank[7] = 1;
 		pass= 2;
 		if (debugtype != NoDebug)
 			pout= & cout;
@@ -2744,7 +2762,14 @@ void Asm::In::processfile ()
 		if (lastpass > 2)
 		{
 			//reset bank num,ber on each pass
-			CurrentBank = 0;
+			CurrentBank[0] = 256;
+			CurrentBank[1] = 256;
+			CurrentBank[2] = 10;
+			CurrentBank[3] = 11;
+			CurrentBank[4] = 4;
+			CurrentBank[5] = 5;
+			CurrentBank[6] = 0;
+			CurrentBank[7] = 1;
 			pass= 3;
 			dopass ();
 		}
@@ -6023,11 +6048,32 @@ void Asm::In::parseBANK(Tokenizer & tz)
 {
 
 	Token tok = tz.gettoken();
+
+	if (tok.type() != TypeNumber && tok.type() != TypeIdentifier)
+	{
+		throw ErrorSETBANK;
+	}
+
 	address value = parseexpr(false, tok, tz,false);
+	expectcomma(tz);
+	tok = tz.gettoken();
+	if (tok.type() != TypeNumber && tok.type() != TypeIdentifier)
+	{
+		throw ErrorSETBANK;
+	}
+	address bank = parseexpr(false, tok, tz, false);
+
+
 	checkendline(tz);
-	bool islocal = setdefl("CURRENTBANK", value);
-	*pout <<"\t\tBANK "<< hex4(value) << endl;
-	CurrentBank = value;
+	setdefl("CURRENTBANK"+ GetBank(value) , bank);
+	setdefl("CURRENTBANK", bank);
+	*pout <<"\t\tBANK "<< hex4(value) << "=" << bank << "    "<<GetBank((int)value) <<endl;
+
+
+
+	CurrentBank[ GetBank((int)value) ] = (int)bank;
+
+//	CurrentBank = value;
 }
 
 
@@ -7475,8 +7521,12 @@ void Asm::In::dumpsymboltrace()
 		it != mapvar.end();
 		++it)
 	{
+
 		const VarData & vd = it->second;
 		// Dump only EQU and label valid symbols.
+
+		if (vd.islocal()) continue;
+
 		if (vd.def() != DefinedPass2)
 			continue;
 

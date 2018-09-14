@@ -1,5 +1,12 @@
 Forked Pasmo assembler
 
+Example compile command line:
+
+pasmo.exe--sna --alocal --cspecsymbols --snasmerrors --tracedata lowresdemo.asm lr.sna lr.sna.map
+
+
+
+
 
 Extra Options:
 
@@ -8,6 +15,9 @@ Extra Options:
 
 --snasmerrors
 	Outputs errors messages in snasms format
+
+--tracedata
+	Outpus trace data for use with RemoteDebugger.
 
 Comments:
 You can now use // and ; to define line comments
@@ -62,11 +72,12 @@ example
 	HWSPRITEDATA_SX: rw 1
 
 
-SETBANK <value>
-	Sets the CURRENTBANK varible to value. Also all labels defined after this command will store the bank it was defined in.
+SETBANK <addr>,<value>
+	Sets the CURRENTBANK varible to value for addr to addr + 0x1fff (8k). Also all labels defined after this command will store the bank it was defined in.
 	then you can do ?? before a label to get the bank of that label.
 example
-	SETBANK 5
+	SETBANK $2000,5   sets the code now compiled from $2000-$3fff to use bank 5
+	SETBANK $4000,6   sets the code now compiled from $4000-$5fff to use bank 6
 
 DATA:	HEX 0002008C8C8C8C8C8C49B6B6498C0001
 

@@ -12,6 +12,13 @@ const char hexdigit []= { '0', '1', '2', '3', '4', '5', '6', '7',
 
 } // namespace
 
+
+int GetBank(int addr)
+{
+	return ((addr >> 13) & 7);
+}
+
+
 std::string hex2str (byte b)
 {
 	return std::string (1, hexdigit [ (b >> 4) & 0x0F] ) +
