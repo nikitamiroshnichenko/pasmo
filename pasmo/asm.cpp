@@ -7510,8 +7510,11 @@ void Asm::In::dumpsymbolcspec(std::ostream & out)
 		// Dump only EQU and label valid symbols.
 		if (vd.def() != DefinedPass2)
 			continue;
+		std::string v = it->first;
 
-		out << "0000" << hex4(vd.getvalue()) << " " << it->first << endl;
+		std::transform(v.begin(), v.end(), v.begin(), toupper);
+
+		out << "0000" << hex4(vd.getvalue()) << " " << v << endl;
 
 	}
 }
