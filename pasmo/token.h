@@ -163,14 +163,14 @@ enum TypeToken {
 	// C is listed as flag.
 	TypeA,
 	TypeAF,
-	TypeA32,
+	//TypeA32,
 	TypeAFp, // AF'
 	TypeB,
 	TypeBC,
 	TypeD,
 	TypeE,
 	TypeDE,
-	TypeDEHL,
+	//TypeDEHL,
 	TypeH,
 	TypeL,
 	TypeHL,

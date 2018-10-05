@@ -262,9 +262,9 @@ const address addrFALSE= 0;
 
 // Register codes used in some instructions.
 
-enum regdwCode {
-	regDEHL= 0
-};
+// enum regdwCode {
+//		regDEHL = 0
+//};
 
 enum regwCode {
 	regBC= 0, regDE= 1, regHL= 2, regAF= 3, regSP= 3
@@ -389,11 +389,11 @@ std::string nameHLpref (byte prefix)
 const bool nameSP= true;
 const bool nameAF= false;
 
-std::string regdwName (regdwCode code, byte prefix)
-{
-	ASSERT (code == regDEHL || prefix == prefixED);
-    return "DEHL";
-}
+//std::string regdwName (regdwCode code, byte prefix)
+//{
+//	ASSERT (code == regDEHL || prefix == prefixED);
+ //   return "DEHL";
+//}
 
 std::string regwName (regwCode code, bool useSP, byte prefix)
 {
@@ -1131,8 +1131,8 @@ private:
 		regwCode regcode, byte prefix= NoPrefix);
 	void parseLDdouble (Tokenizer & tz, regwCode regcode,
 		byte prefix= NoPrefix);
-	void parseLDquad (Tokenizer & tz, regdwCode regcode,
-		byte prefix= prefixED);
+//	void parseLDquad (Tokenizer & tz, regdwCode regcode,
+//		byte prefix= prefixED);
 	void parseLDSP (Tokenizer & tz);
 
 	void parseLD_IrPlus (Tokenizer & tz, bool bracket, byte prefix);
@@ -3752,11 +3752,11 @@ void Asm::In::dobyteinmediate (Tokenizer & tz, byte code,
 	}
 
 
-	if (value > 256 && pass>=lastpass)
-	{
-		emitwarning("byte value source > 255!");
-
-	}
+	// if (value > 256 && pass >= lastpass)
+	// {
+	//	emitwarning("byte value source > 255!");
+	//
+//	}
 	byte bvalue= lobyte (value);
 	gencode (code, bvalue);
 
@@ -4047,7 +4047,7 @@ void Asm::In::parseLDA (Tokenizer & tz)
 		no8080 ();
 }
 
-void Asm::In::parseLDA32 (Tokenizer & tz)
+/*void Asm::In::parseLDA32 (Tokenizer & tz)
 {
 	expectcomma (tz);
 	Token tok= tz.gettoken ();
@@ -4059,7 +4059,7 @@ void Asm::In::parseLDA32 (Tokenizer & tz)
     showcode ("LD A32, DEHL");
 	checkendline (tz);
     no8080 ();
-}
+}*/
 
 
 void Asm::In::parseLDsimplen (Tokenizer & tz, regbCode regcode,
@@ -4298,7 +4298,7 @@ void Asm::In::parseLDdouble (Tokenizer & tz,
 	}
 }
 
-void Asm::In::parseLDquad (Tokenizer & tz,
+/*void Asm::In::parseLDquad (Tokenizer & tz,
     regdwCode regcode, byte prefix)
 {
 	TRF;
@@ -4322,7 +4322,7 @@ void Asm::In::parseLDquad (Tokenizer & tz,
     }
 	checkendline (tz);
 }
-
+*/
 void Asm::In::parseLDSP (Tokenizer & tz)
 {
 	expectcomma (tz);
@@ -4575,9 +4575,9 @@ void Asm::In::parseLD (Tokenizer & tz)
 	case TypeA:
 		parseLDA (tz);
 		break;
-	case TypeA32:
-		parseLDA32 (tz);
-		break;
+//	case TypeA32:
+//		parseLDA32 (tz);
+//		break;
 	case TypeB:
 		parseLDsimple (tz, regB);
 		break;
@@ -4620,9 +4620,9 @@ void Asm::In::parseLD (Tokenizer & tz)
 	case TypeDE:
 		parseLDdouble (tz, regDE);
 		break;
-	case TypeDEHL:
-        parseLDquad (tz, regDEHL);
-		break;
+//	case TypeDEHL:
+ //       parseLDquad (tz, regDEHL);
+//		break;
 	case TypeHL:
 		parseLDdouble (tz, regHL);
 		break;
@@ -4712,16 +4712,16 @@ void Asm::In::parseSUB (Tokenizer & tz)
 
 	switch (tok.type () )
 	{
-	case TypeDEHL:
-        parseSUBDEHL(tz);
-        break;
+//	case TypeDEHL:
+ //       parseSUBDEHL(tz);
+ //       break;
     default:
         tz.ungettoken();
     	dobyteparam (tz, tiSUB);
     }
 }
 
-void Asm::In::parseSUBDEHL (Tokenizer & tz)
+/*void Asm::In::parseSUBDEHL (Tokenizer & tz)
 {
     expectcomma (tz);
     no86 ();
@@ -4742,7 +4742,7 @@ void Asm::In::parseSUBDEHL (Tokenizer & tz)
     }
     no8080 ();
 	checkendline (tz);
-}
+}*/
 
 void Asm::In::parseADDBCDE (Tokenizer & tz, byte prefix, byte basecode)
 {
@@ -4760,12 +4760,14 @@ void Asm::In::parseADDBCDE (Tokenizer & tz, byte prefix, byte basecode)
         no8080 ();
 		break;
     case TypeNumber:
-        {
+	case TypeMinus:
+	case TypeIdentifier:
+	{
             no86 ();
             gencodeED (basecode + 0x03);
             address value= parseexpr (true, tok, tz,false);
             gendataword (value);
-            showcode ("ADD HL" + std::string(basecode == codeADDBC ? "BC" : "DE") + ", " + hex4str(value));
+            showcode ("ADD " + std::string(basecode == codeADCHL ? "HL":std::string(basecode == codeADDBC ? "BC" : "DE")) + ", " + hex4str(value));
             no8080 ();
         }
         break;
@@ -4775,7 +4777,7 @@ void Asm::In::parseADDBCDE (Tokenizer & tz, byte prefix, byte basecode)
 	checkendline (tz);
 }
 
-void Asm::In::parseADDDEHL (Tokenizer & tz)
+/*void Asm::In::parseADDDEHL (Tokenizer & tz)
 {
 	expectcomma (tz);
 	Token tok= tz.gettoken ();
@@ -4804,7 +4806,7 @@ void Asm::In::parseADDDEHL (Tokenizer & tz)
     }
     no8080 ();
     checkendline (tz);
-}
+}*/
 
 
 void Asm::In::parseADDADCSBCHL (Tokenizer & tz, byte prefix, byte basecode)
@@ -4847,7 +4849,9 @@ void Asm::In::parseADDADCSBCHL (Tokenizer & tz, byte prefix, byte basecode)
 		reg= regHL;
 		break;
     case TypeNumber:
-        {
+	case TypeMinus:
+	case TypeIdentifier:
+	{
             no86 ();
             gencodeED (0x34);
             address value= parseexpr (true, tok, tz,false);
@@ -4857,6 +4861,8 @@ void Asm::In::parseADDADCSBCHL (Tokenizer & tz, byte prefix, byte basecode)
     	    checkendline (tz);
         }
         return;
+
+
 	default:
 		throw InvalidOperand;
 	}
@@ -4933,9 +4939,9 @@ void Asm::In::parseADD (Tokenizer & tz)
 	case TypeHL:
 		parseADDADCSBCHL (tz, NoPrefix, codeADDHL);
 		return;
-    case TypeDEHL:
-        parseADDDEHL (tz);
-        return;
+//    case TypeDEHL:
+ //       parseADDDEHL (tz);
+ //       return;
 	case TypeIX:
 		parseADDADCSBCHL (tz, prefixIX, codeADDHL);
 		return;
@@ -5529,12 +5535,12 @@ void Asm::In::parseINCDEC (Tokenizer & tz, bool isINC)
 	case TypeHL:
 		parseINCDECdouble (tz, isINC, regHL);
 		break;
-	case TypeDEHL:
-        no86 ();
-		isINC ? gencodeED (0x37) : gencodeED (0x38);
-    	showcode (std::string (isINC ? "INC" : "DEC") + ' ' + regdwName (regDEHL, 0xED) );
-		no8080 ();
-		break;
+//	case TypeDEHL:
+ //       no86 ();
+//		isINC ? gencodeED (0x37) : gencodeED (0x38);
+ //   	showcode (std::string (isINC ? "INC" : "DEC") + ' ' + regdwName (regDEHL, 0xED) );
+//		no8080 ();
+//		break;
 	case TypeIX:
 		parseINCDECdouble (tz, isINC, regHL, prefixIX);
 		break;
@@ -5604,16 +5610,16 @@ void Asm::In::parseEX (Tokenizer & tz)
 		showcode ("EX AF, AF'");
 		no8080 ();
 		break;
-	case TypeA32:
+/*	case TypeA32:
 		expectcomma (tz);
 		tok= tz.gettoken ();
-		if (tok.type () != TypeDEHL)
-			throw InvalidOperand;
+//		if (tok.type () != TypeDEHL)
+//			throw InvalidOperand;
 		no86 ();
 		gencodeED (0x22);
 		showcode ("EX A32, DEHL");
 		no8080 ();
-		break;
+		break;*/
 	case TypeDE:
 		expectcomma (tz);
 		tok= tz.gettoken ();
@@ -6065,7 +6071,8 @@ void Asm::In::parseBANK(Tokenizer & tz)
 
 
 	checkendline(tz);
-	setdefl("CURRENTBANK"+ GetBank(value) , bank);
+
+	setdefl("CURRENTBANK"+ hex4str(value) , bank);
 	setdefl("CURRENTBANK", bank);
 	*pout <<"\t\tBANK "<< hex4(value) << "=" << bank << "    "<<GetBank((int)value) <<endl;
 

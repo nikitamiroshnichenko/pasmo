@@ -85,3 +85,10 @@ DATA:	HEX 0002008C8C8C8C8C8C49B6B6498C0001
 	ld a,?? DATA (sets a to the bank "5", of the label data)
 
 
+
+	Fixes:
+
+	removed A32 and DEHL registers
+	Fixed Next instruction ADD HL/DB/BC,A & ADD HL/DB/BC,XXXX you can now use minus numbers and identifiers.
+	Fixed/removed warning when doing ld a,-10 
+	Fixed CURRENTBANK define 
