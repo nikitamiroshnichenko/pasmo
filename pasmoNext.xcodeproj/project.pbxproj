@@ -1,0 +1,338 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C6590ECA21D5138E00F0B68B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EB521D5138D00F0B68B /* main.cpp */; };
+		C6590ECB21D5138E00F0B68B /* pasmotypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EB621D5138D00F0B68B /* pasmotypes.cpp */; };
+		C6590ECC21D5138E00F0B68B /* cpc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EB721D5138D00F0B68B /* cpc.cpp */; };
+		C6590ECD21D5138E00F0B68B /* token.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EBA21D5138D00F0B68B /* token.cpp */; };
+		C6590ECE21D5138E00F0B68B /* trace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EBB21D5138D00F0B68B /* trace.cpp */; };
+		C6590ECF21D5138E00F0B68B /* asm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EC021D5138D00F0B68B /* asm.cpp */; };
+		C6590ED021D5138E00F0B68B /* pasmo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EC221D5138D00F0B68B /* pasmo.cpp */; };
+		C6590ED121D5138E00F0B68B /* tap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EC321D5138D00F0B68B /* tap.cpp */; };
+		C6590ED221D5138E00F0B68B /* asmfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EC421D5138E00F0B68B /* asmfile.cpp */; };
+		C6590ED321D5138E00F0B68B /* tzx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EC621D5138E00F0B68B /* tzx.cpp */; };
+		C6590ED421D5138E00F0B68B /* spectrum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6590EC721D5138E00F0B68B /* spectrum.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C68F9FDA21D3A15200672B37 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		C6590EB521D5138D00F0B68B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = pasmo/main.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EB621D5138D00F0B68B /* pasmotypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pasmotypes.cpp; path = pasmo/pasmotypes.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EB721D5138D00F0B68B /* cpc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cpc.cpp; path = pasmo/cpc.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EB821D5138D00F0B68B /* asmfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = asmfile.h; path = pasmo/asmfile.h; sourceTree = SOURCE_ROOT; };
+		C6590EB921D5138D00F0B68B /* pasmotypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pasmotypes.h; path = pasmo/pasmotypes.h; sourceTree = SOURCE_ROOT; };
+		C6590EBA21D5138D00F0B68B /* token.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = token.cpp; path = pasmo/token.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EBB21D5138D00F0B68B /* trace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trace.cpp; path = pasmo/trace.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EBC21D5138D00F0B68B /* tap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tap.h; path = pasmo/tap.h; sourceTree = SOURCE_ROOT; };
+		C6590EBD21D5138D00F0B68B /* trace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trace.h; path = pasmo/trace.h; sourceTree = SOURCE_ROOT; };
+		C6590EBE21D5138D00F0B68B /* token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = token.h; path = pasmo/token.h; sourceTree = SOURCE_ROOT; };
+		C6590EBF21D5138D00F0B68B /* pasmo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pasmo.h; path = pasmo/pasmo.h; sourceTree = SOURCE_ROOT; };
+		C6590EC021D5138D00F0B68B /* asm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = asm.cpp; path = pasmo/asm.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EC121D5138D00F0B68B /* tzx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tzx.h; path = pasmo/tzx.h; sourceTree = SOURCE_ROOT; };
+		C6590EC221D5138D00F0B68B /* pasmo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pasmo.cpp; path = pasmo/pasmo.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EC321D5138D00F0B68B /* tap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tap.cpp; path = pasmo/tap.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EC421D5138E00F0B68B /* asmfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = asmfile.cpp; path = pasmo/asmfile.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EC521D5138E00F0B68B /* spectrum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum.h; path = pasmo/spectrum.h; sourceTree = SOURCE_ROOT; };
+		C6590EC621D5138E00F0B68B /* tzx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tzx.cpp; path = pasmo/tzx.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EC721D5138E00F0B68B /* spectrum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = spectrum.cpp; path = pasmo/spectrum.cpp; sourceTree = SOURCE_ROOT; };
+		C6590EC821D5138E00F0B68B /* cpc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cpc.h; path = pasmo/cpc.h; sourceTree = SOURCE_ROOT; };
+		C6590EC921D5138E00F0B68B /* asm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = asm.h; path = pasmo/asm.h; sourceTree = SOURCE_ROOT; };
+		C68F9FDC21D3A15200672B37 /* pasmoNext */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; name = pasmoNext; path = /Users/ckirby101/Documents/GitHub/pasmoNext/build/Debug/pasmoNext; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C68F9FD921D3A15200672B37 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C6590EB421D5134100F0B68B /* pasmo */ = {
+			isa = PBXGroup;
+			children = (
+				C6590EC021D5138D00F0B68B /* asm.cpp */,
+				C6590EC921D5138E00F0B68B /* asm.h */,
+				C6590EC421D5138E00F0B68B /* asmfile.cpp */,
+				C6590EB821D5138D00F0B68B /* asmfile.h */,
+				C6590EB721D5138D00F0B68B /* cpc.cpp */,
+				C6590EC821D5138E00F0B68B /* cpc.h */,
+				C6590EB521D5138D00F0B68B /* main.cpp */,
+				C6590EC221D5138D00F0B68B /* pasmo.cpp */,
+				C6590EBF21D5138D00F0B68B /* pasmo.h */,
+				C6590EB621D5138D00F0B68B /* pasmotypes.cpp */,
+				C6590EB921D5138D00F0B68B /* pasmotypes.h */,
+				C6590EC721D5138E00F0B68B /* spectrum.cpp */,
+				C6590EC521D5138E00F0B68B /* spectrum.h */,
+				C6590EC321D5138D00F0B68B /* tap.cpp */,
+				C6590EBC21D5138D00F0B68B /* tap.h */,
+				C6590EBA21D5138D00F0B68B /* token.cpp */,
+				C6590EBE21D5138D00F0B68B /* token.h */,
+				C6590EBB21D5138D00F0B68B /* trace.cpp */,
+				C6590EBD21D5138D00F0B68B /* trace.h */,
+				C6590EC621D5138E00F0B68B /* tzx.cpp */,
+				C6590EC121D5138D00F0B68B /* tzx.h */,
+			);
+			path = pasmo;
+			sourceTree = "<group>";
+		};
+		C68F9FD321D3A15200672B37 = {
+			isa = PBXGroup;
+			children = (
+				C6590EB421D5134100F0B68B /* pasmo */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C68F9FDB21D3A15200672B37 /* pasmoNext */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C68F9FE321D3A15200672B37 /* Build configuration list for PBXNativeTarget "pasmoNext" */;
+			buildPhases = (
+				C68F9FD821D3A15200672B37 /* Sources */,
+				C68F9FD921D3A15200672B37 /* Frameworks */,
+				C68F9FDA21D3A15200672B37 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = pasmoNext;
+			productName = pasmoNext;
+			productReference = C68F9FDC21D3A15200672B37 /* pasmoNext */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C68F9FD421D3A15200672B37 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "Chrsitopher Kirby";
+				TargetAttributes = {
+					C68F9FDB21D3A15200672B37 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = C68F9FD721D3A15200672B37 /* Build configuration list for PBXProject "pasmoNext" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = C68F9FD321D3A15200672B37;
+			productRefGroup = C68F9FD321D3A15200672B37;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C68F9FDB21D3A15200672B37 /* pasmoNext */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C68F9FD821D3A15200672B37 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C6590ECC21D5138E00F0B68B /* cpc.cpp in Sources */,
+				C6590ECB21D5138E00F0B68B /* pasmotypes.cpp in Sources */,
+				C6590ED321D5138E00F0B68B /* tzx.cpp in Sources */,
+				C6590ECE21D5138E00F0B68B /* trace.cpp in Sources */,
+				C6590ED021D5138E00F0B68B /* pasmo.cpp in Sources */,
+				C6590ED421D5138E00F0B68B /* spectrum.cpp in Sources */,
+				C6590ECF21D5138E00F0B68B /* asm.cpp in Sources */,
+				C6590ED221D5138E00F0B68B /* asmfile.cpp in Sources */,
+				C6590ED121D5138E00F0B68B /* tap.cpp in Sources */,
+				C6590ECA21D5138E00F0B68B /* main.cpp in Sources */,
+				C6590ECD21D5138E00F0B68B /* token.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C68F9FE121D3A15200672B37 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		C68F9FE221D3A15200672B37 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		C68F9FE421D3A15200672B37 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JR35Z82PZE;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					MAC,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C68F9FE521D3A15200672B37 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JR35Z82PZE;
+				GCC_PREPROCESSOR_DEFINITIONS = MAC;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C68F9FD721D3A15200672B37 /* Build configuration list for PBXProject "pasmoNext" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C68F9FE121D3A15200672B37 /* Debug */,
+				C68F9FE221D3A15200672B37 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C68F9FE321D3A15200672B37 /* Build configuration list for PBXNativeTarget "pasmoNext" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C68F9FE421D3A15200672B37 /* Debug */,
+				C68F9FE521D3A15200672B37 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C68F9FD421D3A15200672B37 /* Project object */;
+}

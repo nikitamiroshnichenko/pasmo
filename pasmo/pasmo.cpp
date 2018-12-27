@@ -1,7 +1,12 @@
 // pasmo.cpp
 // Revision 15-apr-2008
 
+
+#include "pasmo.h"
+
 #include "asm.h"
+
+
 
 #include <string>
 #include <vector>
@@ -14,6 +19,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+
 namespace {
 
 
@@ -21,7 +27,12 @@ using std::string;
 using std::vector;
 using std::runtime_error;
 
-const string pasmoversion ("0.5.4.beta2");
+    
+#if MAC
+    const string pasmoversion ("v0.1 (MAC)");
+#else
+    const string pasmoversion ("v0.1 (PC)");
+#endif
 
 
 class Usage { };
@@ -33,6 +44,8 @@ public:
 	{ }
 };
 
+
+    
 class InvalidOption : public runtime_error {
 public:
 	InvalidOption (const string & option) :
@@ -155,7 +168,7 @@ Options::Options (int argc, char * * argv) :
 	pass3 (false)
 {
 	int argpos;
-	for (argpos= 1; argpos < argc; ++argpos)
+    for (argpos= 1; argpos < argc; ++argpos)
 	{
 		const string arg (argv [argpos] );
 		if (arg == optbin)
@@ -425,8 +438,11 @@ int doit (int argc, char * * argv)
 } // namespace
 
 
-
+#if MAC
+int Pmain (int argc, char * * argv)
+#else
 int main (int argc, char * * argv)
+#endif
 {
 	// Just call doit and show possible errors.
 
@@ -448,8 +464,8 @@ int main (int argc, char * * argv)
 	}
 	catch (Usage &)
 	{
-		cerr <<	"Pasmo v. " << pasmoversion <<
-			" (C) 2004-2005 Julian Albo\n\n"
+		cerr <<	"PasmoNext " << pasmoversion <<
+			" (C) 2004-2005 Julian Albo\nModified by C Kirby\n"
 			"Usage:\n\n"
 			"\tpasmo [options] source object [symbol]\n\n"
 			"See the README file for details.\n";
@@ -467,3 +483,6 @@ int main (int argc, char * * argv)
 }
 
 // End of pasmo.cpp
+
+
+

@@ -330,19 +330,30 @@ void AsmFile::In::openis (std::ifstream & is, const std::string & filename,
 	std::ios::openmode mode) const
 {
 	ASSERT (! is.is_open () );
+    
+    std::string cfilename = filename;
+    
+    //for mac we need to make sure paths use correct slash
+#if MAC
+    std::replace(cfilename.begin(), cfilename.end(), '\\', '/');
+#endif
+    
 	is.open (filename.c_str (), mode);
 	if (is.is_open () )
 		return;
 	for (size_t i= 0; i < includepath.size (); ++i)
 	{
 		std::string path (includepath [i] );
-		path+= filename;
+		path+= cfilename;
+        
+        //printf ("path %s  ",path.c_str);
+        
 		is.clear ();
 		is.open (path.c_str (), mode);
 		if (is.is_open () )
 			return;
 	}
-	throw FileNotFound (filename);
+	throw FileNotFound (cfilename);
 }
 
 void AsmFile::In::pushline (size_t filenum, size_t linenum)
