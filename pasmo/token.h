@@ -114,6 +114,13 @@ enum TypeToken {
     TypeLDDRX,
     TypeLDIRSCALE,
     TypeLDPIRX,
+	TypeLDWS,
+	TypeBSLA,
+	TypeBSRA,
+	TypeBSRL,
+	TypeBSRF,
+	TypeBRLC,
+
     TypeMIRROR,
     TypeMUL,
 	TypeNEG,

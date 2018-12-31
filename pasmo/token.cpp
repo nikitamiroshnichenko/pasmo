@@ -132,8 +132,18 @@ const NameType nt []= {
     NT (LDDRX),     // *
     NT (LDIRSCALE), // *
     NT (LDPIRX),    // *
-    NT (MIRROR),    // *
-    NT (MUL),       // *
+	NT(LDWS),    // *
+
+
+	NT (BSLA),
+	NT(BSRA),
+	NT(BSRL),
+	NT(BSRF),
+	NT(BRLC),
+
+	NT(MIRROR),    // *
+	NT(MUL),       // *
+
 	NT (NEG),
     NT (NEXTREG),   // *
 	NT (NOP),

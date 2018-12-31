@@ -19,26 +19,26 @@ Extra Options:
 --tracedata
 	Outpus trace data for use with RemoteDebugger.
 
+
 Comments:
 You can now use // and ; to define line comments
 
-labels:
+Local labels:
 You can now use @ in the same way as _ is pasmo.	
 
 
 
 Commands:
 
-
 SAVEBIN <filename>,<addr>,<length>
-	On last pass file will be written to the hdd fromt he assembled memory, if pc is before the last address data is undefined.
+	On last pass file will be written to the hdd from the assembled memory, if pc is before the last address data is undefined.
 example
 	SAVEBIN "build/bank4.bin",$c000,PC-$c000
 
 
 
 MESSAGE <messages>,...
-	emits a message to console output , car output labels and string and constants. seperate with comma.
+	emits a message to console output , can output labels and string and constants. seperate with comma.
 example
 	MESSAGE "CURRENT PC=",PC
 
@@ -50,7 +50,7 @@ PC
 
 
 HEX <hexbytes>
-	you can now define big clocks of data using HEX statment
+	you can now define big blocks of data using HEX statment
 
 example
 	HEX 0002008C8C8C8C8C8C49B6B6498C0001
@@ -86,9 +86,30 @@ DATA:	HEX 0002008C8C8C8C8C8C49B6B6498C0001
 
 
 
-	Fixes:
 
+
+
+Changes:
+<0.1
 	removed A32 and DEHL registers
 	Fixed Next instruction ADD HL/DB/BC,A & ADD HL/DB/BC,XXXX you can now use minus numbers and identifiers.
 	Fixed/removed warning when doing ld a,-10 
 	Fixed CURRENTBANK define 
+
+0.1
+	added mac support
+
+0.1.1
+	added cspect new label support
+	local labels correctly output names
+	removed fillde
+	fixed LDWS instruction
+	added barrel shift instructions:
+	BSLA DE,B
+	BSRA DE,B
+	BSRL  DE,B
+	BSRF  DE,B
+	BRLC  DE,B
+	added instruction
+	JP (C)
+

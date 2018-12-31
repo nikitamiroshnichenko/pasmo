@@ -29,9 +29,9 @@ using std::runtime_error;
 
     
 #if MAC
-    const string pasmoversion ("v0.1 (MAC)");
+    const string pasmoversion ("v0.1.1 (MAC)");
 #else
-    const string pasmoversion ("v0.1 (PC)");
+    const string pasmoversion ("v0.1.1 (PC)");
 #endif
 
 

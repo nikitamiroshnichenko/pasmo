@@ -660,14 +660,15 @@ InitSimple::InitSimple ()
 	simpleinst [TypeRRCA]= SimpleInst (0x0F, false, true, 0xD0C8);
 	simpleinst [TypeRRD]=  SimpleInst (0x67, true);
     // Simple - Spectrum Next OpCodes
-	simpleinst [TypeFILLDE]=    SimpleInst (0xB5, true);
-	simpleinst [TypeLDIX]=      SimpleInst (0xA5, true);
+	//simpleinst [TypeFILLDE]=    SimpleInst (0xB5, true);
+	simpleinst [TypeLDIX]=      SimpleInst (0xA4, true);
     simpleinst [TypeLDIRX]=     SimpleInst (0xB4, true);
     simpleinst [TypeLDDX]=      SimpleInst (0xAC, true);
     simpleinst [TypeLDDRX]=     SimpleInst (0xBC, true);
     simpleinst [TypeLDIRSCALE]= SimpleInst (0xB6, true);
     simpleinst [TypeLDPIRX]=    SimpleInst (0xB7, true);
-    simpleinst [TypeMUL]=       SimpleInst (0x30, true);
+	simpleinst[TypeLDWS] =		SimpleInst (0xA5, true);
+	simpleinst [TypeMUL]=       SimpleInst (0x30, true);
     simpleinst [TypeOUTINB]=    SimpleInst (0x90, true);
     simpleinst [TypePIXELDN]=   SimpleInst (0x93, true);
     simpleinst [TypePIXELAD]=   SimpleInst (0x94, true);
@@ -822,7 +823,18 @@ public:
 		return (isFunction);
 	}
 
+	void SetLocalName(std::string name)
+	{
+		localname = name;
+	}
+
+	std::string GetLocalName() const
+	{
+		return localname;
+	}
+
 private:
+	std::string localname;
 	address value;
 	Defined defined;
 	bool local;
@@ -1197,6 +1209,13 @@ private:
     void parseTest (Tokenizer & tz);
 
 
+	void parseBSLA (Tokenizer & tz);
+	void parseBSRA(Tokenizer & tz);
+	void parseBSRL(Tokenizer & tz);
+	void parseBSRF(Tokenizer & tz);
+	void parseBRLC(Tokenizer & tz);
+
+
 	void parseRB(Tokenizer & tz, const std::string & label);
 	void parseRW(Tokenizer & tz, const std::string & label);
 	void parseDEFB(Tokenizer & tz);
@@ -1249,6 +1268,9 @@ private:
 	int lastpass;
 	bool usesnasmerrors;
 	size_t iflevel;
+	std::string LastLabelDefined;
+
+
 
 	// ********** Symbol tables ************
 
@@ -1257,6 +1279,8 @@ private:
 
 	typedef std::set <std::string> setpublic_t;
 	setpublic_t setpublic;
+
+
 
 	// ********* Information streams ********
 
@@ -1327,103 +1351,110 @@ private:
 namespace pasmo_impl {
 
 
-LocalLevel::LocalLevel (Asm::In & asmin_n) :
-	asmin (asmin_n)
-{ }
+	LocalLevel::LocalLevel (Asm::In & asmin_n) :
+		asmin (asmin_n)
+	{ }
 
-LocalLevel::~LocalLevel ()
-{
-	for (mapvar_t::iterator it= saved.begin ();
-		it != saved.end ();
-		++it)
+	LocalLevel::~LocalLevel ()
 	{
-		const std::string locname= it->first;
-		const std::string & globname= globalized [locname];
-		asmin.mapvar [globname]= asmin.mapvar [locname];
-		asmin.mapvar [locname]= it->second;
+		for (mapvar_t::iterator it= saved.begin ();
+			it != saved.end ();
+			++it)
+		{
+			const std::string locname= it->first;
+			const std::string & globname= globalized [locname];
+			asmin.mapvar [globname]= asmin.mapvar [locname];
+			asmin.mapvar [locname]= it->second;
+		}
 	}
-}
 
-bool LocalLevel::is_auto () const
-{
-	return false;
-}
-
-void LocalLevel::add (const std::string & var)
-{
-	// Ignore redeclarations as LOCAL
-	// of the same identifier.
-	if (saved.find (var) != saved.end () )
-		return;
-
-	saved [var]= asmin.mapvar [var];
-
-	const std::string globname= asmin.genlocalname ();
-	globalized [var]= globname;
-
-	if (asmin.currentpass () == 1)
+	bool LocalLevel::is_auto () const
 	{
-		asmin.mapvar [var]= VarData (true);
+		return false;
 	}
-	else
+
+	void LocalLevel::add (const std::string & var)
 	{
-		asmin.mapvar [var]= asmin.mapvar [globname];
+		// Ignore redeclarations as LOCAL
+		// of the same identifier.
+		if (saved.find (var) != saved.end () )
+			return;
+
+		saved [var]= asmin.mapvar [var];
+
+
+
+		const std::string globname= asmin.genlocalname ();
+		globalized [var]= globname;
+
+		if (asmin.currentpass () == 1)
+		{
+			asmin.mapvar [var]= VarData (true);
+
+			std::string localname = asmin.LastLabelDefined + var;
+
+			asmin.mapvar[var].SetLocalName( localname );
+
+		}
+		else
+		{
+			asmin.mapvar [var]= asmin.mapvar [globname];
+		}
 	}
-}
 
-AutoLevel::AutoLevel (Asm::In & asmin_n) :
-	LocalLevel (asmin_n)
-{ }
+	AutoLevel::AutoLevel (Asm::In & asmin_n) :
+		LocalLevel (asmin_n)
+	{ }
 
-bool AutoLevel::is_auto () const
-{
-	return true;
-}
+	bool AutoLevel::is_auto () const
+	{
+		return true;
+	}
 
-ProcLevel::ProcLevel (Asm::In & asmin_n, size_t line) :
-	LocalLevel (asmin_n),
-	line (line)
-{ }
+	ProcLevel::ProcLevel (Asm::In & asmin_n, size_t line) :
+		LocalLevel (asmin_n),
+		line (line)
+	{ }
 
-size_t ProcLevel::getline () const
-{
-	return line;
-}
+	size_t ProcLevel::getline () const
+	{
+		return line;
+	}
 
-MacroLevel::MacroLevel (Asm::In & asmin_n) :
-	LocalLevel (asmin_n)
-{ }
+	MacroLevel::MacroLevel (Asm::In & asmin_n) :
+		LocalLevel (asmin_n)
+	{ }
 
-LocalStack::~LocalStack ()
-{
-	while (! st.empty () )
-		pop ();
-}
+	LocalStack::~LocalStack ()
+	{
+		while (! st.empty () )
+			pop ();
+	}
 
-bool LocalStack::empty () const
-{
-	return st.empty ();
-}
+	bool LocalStack::empty () const
+	{
+		return st.empty ();
+	}
 
-void LocalStack::push (LocalLevel * level)
-{
-	st.push (level);
-}
+	void LocalStack::push (LocalLevel * level)
+	{
+		st.push (level);
+	}
 
-LocalLevel * LocalStack::top ()
-{
-	if (st.empty () )
-		throw LocalNotExist;
-	return st.top ();
-}
+	LocalLevel * LocalStack::top ()
+	{
+		if (st.empty () )
+			throw LocalNotExist;
+		return st.top ();
+	}
 
-void LocalStack::pop ()
-{
-	if (st.empty () )
-		throw LocalNotExist;
-	delete st.top ();
-	st.pop ();
-}
+	void LocalStack::pop ()
+	{
+		if (st.empty () )
+			throw LocalNotExist;
+		delete st.top ();
+		st.pop ();
+	}
 
 
 } // namespace pasmo_impl
@@ -1750,7 +1781,7 @@ bool Asm::In::setvar (const std::string & varname,
 	TRFDEBS ("Set '" << varname << "' to " << value<<" in bank "<< CurrentBank[ GetBank((int)value) ] << "  bi:"<< GetBank((int)value));
 
 
-	*pout << "Set '" << varname << "' to " << value << " in bank " << CurrentBank[GetBank((int)value)] << "  bi:" << GetBank((int)value) << endl;
+	*pout << "Set '" << varname << "' to " << value << " in bank " << CurrentBank[GetBank((int)value)] << "  bi:" << GetBank((int)value) << " " << defined <<endl;
 
 	checkautolocal (varname);
 	mapvar_t::iterator it= mapvar.find (varname);
@@ -1761,8 +1792,14 @@ bool Asm::In::setvar (const std::string & varname,
 
 		switch (defined)
 		{
+
+		case DefinedPass1:
+			break;
+
 		case DefinedPass2:
 			{
+
+
 				address oldval= it->second.getvalue ();
 				if (pass == lastpass && oldval != value)
 				{
@@ -1782,6 +1819,7 @@ bool Asm::In::setvar (const std::string & varname,
 				}
 			}
 			break;
+
 		default:
 			/* Nothing */;
 		}
@@ -2254,13 +2292,13 @@ void Asm::In::parsegetbank(Tokenizer & tz, address & result,
 	bool required, bool ignored, bool flowcontrol)
 {
 	Token tok = tz.gettoken();
-	switch (tok.type())
-	{
+	//switch (tok.type())
+	//{
 
-	default:
+	//default:
 		tz.ungettoken();
 		parsebankvalue(tz, result, required, ignored);
-	}
+//	}
 }
 
 
@@ -2591,6 +2629,7 @@ void Asm::In::initlocal ()
 
 std::string Asm::In::genlocalname ()
 {
+
 	return hex8str (localcount++);
 }
 
@@ -2609,6 +2648,8 @@ AutoLevel * Asm::In::enterautolocal ()
 	AutoLevel * pav;
 	if (localstack.empty () || ! localstack.top ()->is_auto () )
 	{
+
+
 		* pout << "Enter autolocal level" << endl;
 		pav= new AutoLevel (* this);
 		localstack.push (pav);
@@ -2964,6 +3005,7 @@ void Asm::In::parsegeneric (Tokenizer & tz, Token tok)
 	case TypeRR:
 		parseRR (tz);
 		break;
+
 	case TypeRRC:
 		parseRRC (tz);
 		break;
@@ -3056,6 +3098,21 @@ void Asm::In::parsegeneric (Tokenizer & tz, Token tok)
     case TypeTEST:
         parseTest (tz);
         break;
+	case TypeBSLA:
+		parseBSLA(tz);
+		break;
+	case TypeBSRA:
+		parseBSRA(tz);
+		break;
+	case TypeBSRL:
+		parseBSRL(tz);
+		break;
+	case TypeBSRF:
+		parseBSRF(tz);
+		break;
+	case TypeBRLC:
+		parseBRLC(tz);
+		break;
 	default:
 		throw NoInstruction (tok);
 	}
@@ -3376,6 +3433,12 @@ bool Asm::In::setdefl (const std::string & name, address value)
 void Asm::In::setlabel (const std::string & name)
 {
 	bool islocal= setequorlabel (name, current);
+
+	if (!islocal)
+	{
+		LastLabelDefined = name;
+	}
+
 	* pout << hex4 (current) << ":\t\t";
 	if (islocal)
 		* pout << "local ";
@@ -4710,15 +4773,13 @@ void Asm::In::parseSUB (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
 
-	switch (tok.type () )
-	{
-//	case TypeDEHL:
- //       parseSUBDEHL(tz);
- //       break;
-    default:
+	//switch (tok.type () )
+	//{
+
+    //default:
         tz.ungettoken();
     	dobyteparam (tz, tiSUB);
-    }
+    //}
 }
 
 /*void Asm::In::parseSUBDEHL (Tokenizer & tz)
@@ -5227,8 +5288,15 @@ void Asm::In::parseJP_ (Tokenizer & tz, bool bracket)
 {
 	Token tok= tz.gettoken ();
 	byte prefix= NoPrefix;
+
+	bool NextJPC = false;
+
 	switch (tok.type () )
 	{
+	case TypeC:
+		NextJPC = true;
+		break;
+
 	case TypeHL:
 		break;
 	case TypeIX:
@@ -5242,29 +5310,43 @@ void Asm::In::parseJP_ (Tokenizer & tz, bool bracket)
 	}
 	expectcloseindir (tz, bracket);
 	checkendline (tz);
-	if (prefix != NoPrefix)
+
+	if (NextJPC)
 	{
-		no86 ();
-		gencode (prefix);
-	}
-	if (mode86)
-	{
-		gencode (0xFF, 0xE3);
-		showcode ("JP (HL)");
+		gencode(0xED, 0x98);
+		showcode("JP (C)");
+
 	}
 	else
 	{
-		gencode (0xE9);
-		showcode ("JP (" + nameHLpref (prefix) + ')');
+		if (prefix != NoPrefix)
+		{
+			no86();
+			gencode(prefix);
+		}
+		if (mode86)
+		{
+			gencode(0xFF, 0xE3);
+			showcode("JP (HL)");
+		}
+		else
+		{
+			gencode(0xE9);
+			showcode("JP (" + nameHLpref(prefix) + ')');
+		}
+
+		if (prefix != NoPrefix)
+			no8080();
+
 	}
 
-	if (prefix != NoPrefix)
-		no8080 ();
 }
 
 void Asm::In::parseJP (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
+
+
 	TypeToken tt= tok.type ();
 	if (tt == TypeOpenBracket)
 	{
@@ -5823,7 +5905,7 @@ void Asm::In::parseSET (Tokenizer & tz)
 void Asm::In::parseMirror (Tokenizer & tz)
 {
 	Token tok= tz.gettoken ();
-	byte code;
+	//byte code;
 	switch (tok.type () )
 	{
 	case TypeA:
@@ -5934,6 +6016,101 @@ void Asm::In::parseTest (Tokenizer & tz)
     no8080 ();
     checkendline (tz);
  }
+
+void Asm::In::parseBSLA(Tokenizer & tz)
+{
+
+	Token tok = tz.gettoken();
+	if (tok.type() != TypeDE)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeComma)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeB)
+		throw InvalidOperand;
+
+	no86();
+	gencodeED(0x28);
+	showcode("BSLA DE,B");
+	no8080();
+	checkendline(tz);
+}
+
+void Asm::In::parseBSRA(Tokenizer & tz)
+{
+	Token tok = tz.gettoken();
+	if (tok.type() != TypeDE)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeComma)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeB)
+		throw InvalidOperand;
+
+	no86();
+	gencodeED(0x29);
+	showcode("BSRA DE,B");
+	no8080();
+	checkendline(tz);
+}
+void Asm::In::parseBSRL(Tokenizer & tz)
+{
+	Token tok = tz.gettoken();
+	if (tok.type() != TypeDE)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeComma)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeB)
+		throw InvalidOperand;
+
+	no86();
+	gencodeED(0x2A);
+	showcode("BSRL DE,B");
+	no8080();
+	checkendline(tz);
+}
+void Asm::In::parseBSRF(Tokenizer & tz)
+{
+	Token tok = tz.gettoken();
+	if (tok.type() != TypeDE)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeComma)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeB)
+		throw InvalidOperand;
+
+	no86();
+	gencodeED(0x2B);
+	showcode("BSRF DE,B");
+	no8080();
+	checkendline(tz);
+}
+void Asm::In::parseBRLC(Tokenizer & tz)
+{
+	Token tok = tz.gettoken();
+	if (tok.type() != TypeDE)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeComma)
+		throw InvalidOperand;
+	tok = tz.gettoken();
+	if (tok.type() != TypeB)
+		throw InvalidOperand;
+
+	no86();
+	gencodeED(0x2C);
+	showcode("BRLC DE,B");
+	no8080();
+	checkendline(tz);
+}
+
+
 
 
 
@@ -7519,10 +7696,22 @@ void Asm::In::dumpsymbolcspec(std::ostream & out)
 			continue;
 		std::string v = it->first;
 
+		if (vd.islocal())
+		{
+			v = vd.GetLocalName();
+		}
+
 		std::transform(v.begin(), v.end(), v.begin(), toupper);
 
-		out << "0000" << hex4(vd.getvalue()) << " " << v << endl;
+		//out << "0000" << hex4(vd.getbank()) << " " << v << endl;
+		//out << "0000" << hex4(vd.getvalue()) << " " << hex4(vd.getbank()) << hex4(vd.getvalue()) << " 01 " << v << endl;
 
+		if (vd.GetisFunction())
+		{
+			out << "0000" << hex4(vd.getvalue()) << " " << "0000" << hex4(vd.getvalue()) << " 00 " << v << endl;
+		}
+		else
+			out << "0000" << hex4(vd.getvalue()) << " " << "0000" << hex4(vd.getvalue()) << " 01 " << v << endl;
 	}
 }
 void Asm::In::dumpsymboltrace()

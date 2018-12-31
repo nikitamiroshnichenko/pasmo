@@ -329,6 +329,7 @@ void AsmFile::In::addincludedir (const std::string & dirname)
 void AsmFile::In::openis (std::ifstream & is, const std::string & filename,
 	std::ios::openmode mode) const
 {
+	using std::endl;
 	ASSERT (! is.is_open () );
     
     std::string cfilename = filename;
@@ -338,9 +339,26 @@ void AsmFile::In::openis (std::ifstream & is, const std::string & filename,
     std::replace(cfilename.begin(), cfilename.end(), '\\', '/');
 #endif
     
+	//try to open file from current path
 	is.open (filename.c_str (), mode);
-	if (is.is_open () )
+	if (is.is_open())
+	{
+		//this code will export all code in a single file
+/*		std::ofstream exportfile;
+		exportfile.open("export.asm", std::ios_base::app);
+		std::string line;
+			for (;std::getline(is, line);)
+			{
+				exportfile << line << endl;
+			}
+		is.clear();
+		is.seekg(0, 0);
+		*/
+
 		return;
+	}
+
+	//try to open file from the include paths
 	for (size_t i= 0; i < includepath.size (); ++i)
 	{
 		std::string path (includepath [i] );
@@ -350,8 +368,24 @@ void AsmFile::In::openis (std::ifstream & is, const std::string & filename,
         
 		is.clear ();
 		is.open (path.c_str (), mode);
-		if (is.is_open () )
+		if (is.is_open())
+		{
+			//this code will export all code in a single file
+/*			std::ofstream exportfile;
+			exportfile.open("export.asm", std::ios_base::app);
+			std::string line;
+			for (; std::getline(is, line);)
+			{
+				exportfile << line << endl;
+			}
+			is.clear();
+			is.seekg(0, 0);
+			*/
+
+
+
 			return;
+		}
 	}
 	throw FileNotFound (cfilename);
 }
@@ -382,6 +416,9 @@ void AsmFile::In::copyfile (FileRef & fr, std::ostream & outverb)
 	outverb << "Finished reloading file: " << fr.name () <<
 		" in " << numlines () << endl;
 }
+
+
+
 
 void AsmFile::In::loadfile (const std::string & filename, bool nocase,
 	std::ostream & outverb, std::ostream& outerr,bool usesnasmerrors)
