@@ -84,7 +84,18 @@ DATA:	HEX 0002008C8C8C8C8C8C49B6B6498C0001
 	ld hl,DATA (sets the address of data)
 	ld a,?? DATA (sets a to the bank "5", of the label data)
 
+STRUCT <name>
+	Define a structure
 
+example
+	STRUCT hello
+		width   db 0		;single byte
+		height  dw 0        ;single word (2 bytes)	
+		control db 0,0,0    ;3 byte array
+		data    ds 2        ;2 byte array
+	ENDS
+
+	Will define hello.width to 0 , hello.height to 1 , hello.control to 3 , hello.data to 6 & hello itself is the bytesize of 8.
 
 
 
@@ -112,4 +123,9 @@ Changes:
 	BRLC  DE,B
 	added instruction
 	JP (C)
+
+0.1.2
+	Merged better offset IX & IY control from jounikor pasmo fork
+	Merged STRUCT system from jounikor pasmo fork
+
 

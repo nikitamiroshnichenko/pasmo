@@ -61,6 +61,7 @@ struct NameType {
 };
 
 #define NT(n) NameType (#n, Type ## n)
+#define NTD(n,d) NameType (#n, Type ## d)
 
 #define NT_(n) NameType ("." #n, Type_ ## n)
 
@@ -258,6 +259,10 @@ const NameType nt []= {
 	NT (EXITM),
 	NT (REPT),
 	NT (IRP),
+    NT (STRUCT),
+    NT (ENDS),
+    //NTD (DUP,REPT),
+    //NTD (EDUP,ENDM),
 
 	// Directives with .
 	NT_ (ERROR),
