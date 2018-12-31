@@ -218,6 +218,7 @@ enum TypeToken {
 	TypeINCLUDE,
 	TypeINCBIN,
 	TypeSAVEBIN,
+	TypeFMESSAGE,
 	TypeMESSAGE,
 	TypeSETBANK,
 	TypePC,
@@ -240,6 +241,7 @@ enum TypeToken {
 
     TypeSTRUCT,
     TypeENDS,
+
 
 	// Directives with .
 	Type_ERROR,

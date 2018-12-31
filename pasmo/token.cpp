@@ -240,6 +240,7 @@ const NameType nt []= {
 	NT (INCLUDE),
 	NT (INCBIN),
 	NT (SAVEBIN),
+	NT(FMESSAGE),
 	NT (MESSAGE),
 	NT (SETBANK),
 	NT (PC),
@@ -261,7 +262,7 @@ const NameType nt []= {
 	NT (IRP),
     NT (STRUCT),
     NT (ENDS),
-    //NTD (DUP,REPT),
+		//NTD (DUP,REPT),
     //NTD (EDUP,ENDM),
 
 	// Directives with .

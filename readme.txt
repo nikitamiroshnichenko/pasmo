@@ -42,6 +42,8 @@ MESSAGE <messages>,...
 example
 	MESSAGE "CURRENT PC=",PC
 
+	use %d before varible to output as decimal , otherwise hex will be output.
+	MESSAGE "Size=",%d size
 
 
 PC
@@ -127,5 +129,6 @@ Changes:
 0.1.2
 	Merged better offset IX & IY control from jounikor pasmo fork
 	Merged STRUCT system from jounikor pasmo fork
+	Can use %d in messages to output decimal.
 
 

@@ -28,7 +28,7 @@
 
 #include <ctype.h>
 #include <cstring>
-
+#include <regex>
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -6549,8 +6549,13 @@ void Asm::In::parseRSSET(Tokenizer & tz)
 
 }
 
+
+
+
 void Asm::In::parseMESSAGE(Tokenizer & tz)
 {
+
+
 	// we onyl want to write on the last pass
 	if (currentpass() == lastpass)
 	{
@@ -6558,19 +6563,48 @@ void Asm::In::parseMESSAGE(Tokenizer & tz)
 
 		address result;
 		Token tok = tz.gettoken();
+
+		bool decimal = false;
+
 		while (tok.type() != TypeEndLine)
 		{
+
+
 			switch (tok.type())
 			{
+				case TypeMod:
+
+					tok = tz.gettoken();
+					if (tok.type() == TypeD)
+						decimal = true;
+
+					tok = tz.gettoken();
+
+				continue;
+
+
 				case TypeIdentifier:
 					result = getvalue(tok.str(), true, false);
-					*pwarn << hex4str(result);
+
+					if (decimal)
+						*pwarn << result;
+					else
+						*pwarn << hex4str(result);
+					decimal = false;
 					break;
 
 
 				case TypeDollar:
 				case TypePC:
-					*pwarn << hex4str(currentinstruction);
+
+
+					if (decimal)
+						*pwarn << currentinstruction;
+					else
+						*pwarn << hex4str(currentinstruction);
+
+					decimal = false;
+ 
 					break;
 				default:
 					*pwarn << tok.str();
