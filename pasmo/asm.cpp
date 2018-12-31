@@ -1615,14 +1615,14 @@ void Asm::In::snasmerrors()
 
 void Asm::In::tracedata()
 {
-	*perr << "OPEN TRACE DATA" << std::endl;
+	//*perr << "OPEN TRACE DATA" << std::endl;
 
 
 	tracestream.open("tracedata.txt", std::ofstream::out | std::ofstream::trunc);
 
 	if (tracestream.is_open())
 	{
-		*perr << "TRACE DATA OPEN" << std::endl;
+		//*perr << "TRACE DATA OPEN" << std::endl;
 
 		ptrace = &tracestream;
 	}
@@ -7932,10 +7932,10 @@ void Asm::In::dumpsymbolcspec(std::ostream & out)
 
 		if (vd.GetisFunction())
 		{
-			out << "0000" << hex4(vd.getvalue()) << " " << "0000" << hex4(vd.getvalue()) << " 00 " << v << endl;
+			out << "0000" << hex4(vd.getvalue()) << " " << hex4(vd.getbank()) << hex4(vd.getvalue()) << " 00 " << v << endl;
 		}
 		else
-			out << "0000" << hex4(vd.getvalue()) << " " << "0000" << hex4(vd.getvalue()) << " 01 " << v << endl;
+			out << "0000" << hex4(vd.getvalue()) << " " << hex4(vd.getbank()) << hex4(vd.getvalue()) << " 01 " << v << endl;
 	}
 }
 void Asm::In::dumpsymboltrace()

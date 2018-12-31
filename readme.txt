@@ -130,5 +130,6 @@ Changes:
 	Merged better offset IX & IY control from jounikor pasmo fork
 	Merged STRUCT system from jounikor pasmo fork
 	Can use %d in messages to output decimal.
+	CSPECT -16bit support for symbols
 
 
