@@ -6126,7 +6126,7 @@ void Asm::In::parseNextReg (Tokenizer & tz)
 	Token tok= tz.gettoken ();
 
 
-	if (tok.type () == TypeNumber)
+	if (tok.type () == TypeNumber || tok.type() == TypeIdentifier)
 	{
     	byte reg= parseexpr (true, tok, tz,false);
     	expectcomma (tz);
@@ -6187,6 +6187,10 @@ void Asm::In::parseNextReg (Tokenizer & tz)
 			throw InvalidInstruction;
         }
     }
+	else
+	{
+		throw InvalidOperand;
+	}
 }
 
 void Asm::In::parseTest (Tokenizer & tz)
