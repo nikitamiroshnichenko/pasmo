@@ -131,5 +131,6 @@ Changes:
 	Merged STRUCT system from jounikor pasmo fork
 	Can use %d in messages to output decimal.
 	CSPECT -16bit support for symbols
+	Fixed issue with Nextreg with params using equates
 
 
