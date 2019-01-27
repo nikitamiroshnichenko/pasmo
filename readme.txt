@@ -133,4 +133,6 @@ Changes:
 	CSPECT -16bit support for symbols
 	Fixed issue with Nextreg with params using equates
 
+0.1.3
+
 
